@@ -35,10 +35,19 @@ fn blank_or_empty(str: &str) -> bool {
     str.trim().is_empty()
 }
 
-pub fn parse(path: &Path) -> Result<Conf> {
+pub fn parse(path: Option<&Path>) -> Result<Conf> {
+    let path = if let Some(path) = path {
+        if !path.try_exists().context("file not readable")? {
+            bail!("specified config file '{}' does not exist", path.to_str().unwrap());
+        }
+        path
+    } else {
+        Path::new("rtc.conf")
+    };
+
     let mut options = HashMap::new();
     let contents;
-    if path.try_exists().context("file not readable")? {
+    if path.exists() {
         contents = fs::read_to_string(path).context("error whilst reading from file")?;
         let lines = contents.split('\n').collect::<Vec<&str>>();
         let mut errs = Vec::new();
