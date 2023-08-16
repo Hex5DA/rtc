@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use anyhow::{bail, Context, Result};
-use std::{collections::HashMap, fs, path::Path};
+use std::{collections::HashMap, fs, path::{Path, PathBuf}};
 
 #[derive(Debug)]
 pub enum RelPaths {
@@ -22,13 +22,13 @@ impl From<&str> for RelPaths {
 
 #[derive(Debug)]
 pub struct Conf {
-    root: String,
-    pages: String,
-    errors: String,
-    components: String,
-    layouts: String,
-    dist: String,
-    rel_paths: RelPaths,
+    pub root: PathBuf,
+    pub pages: PathBuf,
+    pub errors: PathBuf,
+    pub components: PathBuf,
+    pub layouts: PathBuf,
+    pub dist: PathBuf,
+    pub rel_paths: RelPaths,
 }
 
 fn blank_or_empty(str: &str) -> bool {
@@ -87,12 +87,12 @@ pub fn parse(path: Option<&Path>) -> Result<Conf> {
 
     #[rustfmt::skip]
     let conf = Conf {
-        root: options.remove("root").unwrap_or(".").to_string(),
-        pages: options.remove("pages").unwrap_or("pages/").to_string(),
-        errors: options.remove("errors").unwrap_or("errors/").to_string(),
-        components: options.remove("components").unwrap_or("components/").to_string(),
-        layouts: options.remove("layouts").unwrap_or("layouts/").to_string(),
-        dist: options.remove("dist").unwrap_or("dist/").to_string(),
+        root: PathBuf::from(options.remove("root").unwrap_or(".")),
+        pages: PathBuf::from(options.remove("pages").unwrap_or("pages/")),
+        errors: PathBuf::from(options.remove("errors").unwrap_or("errors/")),
+        components: PathBuf::from(options.remove("components").unwrap_or("components/")),
+        layouts: PathBuf::from(options.remove("layouts").unwrap_or("layouts/")),
+        dist: PathBuf::from(options.remove("dist").unwrap_or("dist/")),
         rel_paths: options.remove("rel_paths").unwrap_or("base").into(),
     };
 

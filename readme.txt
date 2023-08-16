@@ -149,8 +149,8 @@ rules:
 
 - syntax:
   `<!--- @[directive name] [args, if any] -->`
-- `include [path]`
-  include the contents of the file at `path`. may be absolute or relative.
+- `import [path]`
+  import a component at `path`.
 - `using [path]`
   declares a page to be using a layout declared at `path`
 - `slot`
