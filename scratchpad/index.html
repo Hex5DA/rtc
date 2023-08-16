@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <!-- @import ./header.html -->
+<style>
+    * {
+        padding: 0;
+        margin: 0;
+    }
+
+    header {
+        width: 100vw;
+        background-color: black;
+        color: white;
+        font-size: 20px;
+        display: flex;
+        flex-direction: row;
+        gap: 50px;
+    }
+
+    #theme-switcher {
+    }
+</style>
+<header>
+    <p>hey! header!</p>
+    <button id="theme-switcher">change theme</button>
+</header>
+<script type="module">
+const switcher = document.getElementById("theme-switcher");
+export let dark = true;
+switcher.onclick = () => {
+    dark = !dark;
+    console.log(dark ? "dark mode on" : "light mode on. you psychopath");
+};
+
+</script>
+
+        <h1>page content</h1>
+        <button id="content">content button</button>
+
+        <script type="module">
+            const switcher = document.getElementById("content");
+            switcher.onclick = () => console.log(`hey ${dark}`);
+        </script>
+    </body>
+
+</html>
