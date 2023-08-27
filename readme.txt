@@ -1,10 +1,12 @@
 # Reset The Counter
 
+bear with me, i'm rethinking the project architecture
+
 a micro-framework / HTML preprocessor i'm considering developing.
 
 ## scratchpad 
 
-- import another HTML file with `<!--- @include <url> -->` (note the starting 3 `-`s!)
+- include a file with `<!--- @include <url> -->` (note the starting 3 `-`s!)
 - this HTML file doesn't need `html`, `body` or `head` tags. `style` and `script` can be top level
   (note: this means `style` and `script` tags will be present in the main file's `body` :/)
 - todo: research import maps?
@@ -55,7 +57,7 @@ this won't work.
 - command: `build`
   find every page
   resolve framework features:
-    - resolve `@imports`
+    - resolve `@includes`
     - resolve `@using` (layouts)
     - spit the static `html` files out into `dist/`
       - follow the directory hierarchy
@@ -133,10 +135,14 @@ rules:
   sets: the base directory other directories are calculated off of.
   value: an alternative root directory.
   default: `.`
-- `pages`, `errors`, `components`, `layouts`, `dist`
+- `pages`, `errors`, `layouts`, `dist`
   sets: respective directory
   value: an alternative path for the respective directory. 
   default: the respective name (eg. `pages/`)
+- `include_base`
+  sets: the path used to base includes
+  value: an alternative path
+  default: `components/`
 - rel_paths:
   sets: how relative paths for directives will be calculated
   values: `base` -> from the directory configured
@@ -149,8 +155,8 @@ rules:
 
 - syntax:
   `<!--- @[directive name] [args, if any] -->`
-- `import [path]`
-  import a component at `path`.
+- `include [path]`
+  include a file at `path`. defaults to 
 - `using [path]`
   declares a page to be using a layout declared at `path`
 - `slot`

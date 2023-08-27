@@ -1,0 +1,9 @@
+{
+    "todos": [
+        { "name": "work on rtc", "done": false},
+        { "name": "get up", "done": true },
+        { "name": "have breakfast", "done": true },
+        { "name": "have a nap", "done": false},
+        { "name": "walk the dog", "done": true }
+    ]
+}

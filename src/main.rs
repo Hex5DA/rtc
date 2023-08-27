@@ -1,8 +1,12 @@
-use clap::{Parser, Subcommand};
-use std::{path::{Path, PathBuf}, process, fs};
 use anyhow::Result;
+use clap::{Parser, Subcommand};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+    process,
+};
 
-use crate::directives::get_all_directives;
+use crate::directives::{get_all_directives, DirectiveVariants};
 
 mod conf;
 mod directives;
@@ -27,7 +31,7 @@ struct Args {
 
 fn walk_dir(dir: &PathBuf) -> Result<Vec<PathBuf>> {
     assert!(dir.is_dir());
-    
+
     let mut entries: Vec<PathBuf> = Vec::new();
     for entry in fs::read_dir(dir)? {
         let entry = entry?;
@@ -54,10 +58,24 @@ fn main() {
         Commands::Check => {
             let pages = walk_dir(&conf.pages.clone().into()).unwrap();
             for page in pages {
-                let directives = get_all_directives(&page, &conf).unwrap();
+                let directives = get_all_directives(&page, &conf).unwrap_or_else(|e| {
+                    eprintln!("error raised whilst aggregating directives:\n{}", e);
+                    process::exit(1);
+                });
+                if !directives
+                    .iter()
+                    .any(|d| matches!(d.variant, DirectiveVariants::Using(_)))
+                {
+                    eprintln!(
+                        "page '{}' does not use a template. ({})",
+                        page.file_name().unwrap().to_str().unwrap(),
+                        page.to_str().unwrap()
+                    );
+                    process::exit(1);
+                }
                 println!("directives:\n{:#?}", directives);
             }
-        },
+        }
         _ => unimplemented!(),
     }
 }

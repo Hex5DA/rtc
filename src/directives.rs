@@ -7,9 +7,9 @@ use sscanf::sscanf;
 
 use crate::conf::Conf;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum DirectiveVariants {
-    Import(PathBuf),
+    Include(PathBuf),
     Using(PathBuf),
     Slot,
 }
@@ -30,13 +30,13 @@ fn parse_path_arg(args: &mut Vec<&str>) -> Result<PathBuf> {
 impl DirectiveVariants {
     fn new(name: &str, mut args: Vec<&str>, conf: &Conf) -> Result<Self> {
         Ok(match name {
-            "import" => {
+            "include" => {
                 let rel = parse_path_arg(&mut args)?;
-                DirectiveVariants::Import([&conf.root, &conf.components, &rel].iter().collect())
+                DirectiveVariants::Include([&conf.root, &conf.include_base, &rel].iter().collect())
             }
             "using" => {
                 let rel = parse_path_arg(&mut args)?;
-                DirectiveVariants::Import([&conf.root, &conf.layouts, &rel].iter().collect())
+                DirectiveVariants::Using([&conf.root, &conf.layouts, &rel].iter().collect())
             }
             "slot" => DirectiveVariants::Slot,
             uk => bail!("unknown directive: '{}'", uk),
@@ -46,8 +46,8 @@ impl DirectiveVariants {
 
 #[derive(Debug)]
 pub struct Directive {
-    variant: DirectiveVariants,
-    file: PathBuf,
+    pub variant: DirectiveVariants,
+    pub file: PathBuf,
 }
 
 pub fn get_all_directives(file: &PathBuf, conf: &Conf) -> Result<Vec<Directive>> {

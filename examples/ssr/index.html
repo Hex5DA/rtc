@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <script>
+    window.onload = () => {
+        const refresh = document.getElementById("refresh");
+        refresh.onclick = () => updateTable(getDataFromApiCall());
+    };
+
+    server.onload = () => {
+        const data = JSON.parse(server.fs.readFileSync("data.json"));
+        updateTable(data["todos"]);
+    };
+
+    function updateTable(data) {
+        const body = document.getElementById("table-body");
+        body.innerHTML = "";
+        for (const row of data) {
+            body.insertAdjacentHTML("beforeend", `
+                <tr>
+                    <td>${row.name}</td>
+                    <td>${row.done ? "yes" : "no"}</td>
+                </tr>
+            `);
+        }
+    }
+
+    function getDataFromApiCall() {
+        // you could have API logic here, for example :)
+        return [{ "name": "more shitttt", "done": false }];
+    }
+    </script>
+
+    <h1>testing SSR in RTC</h1>
+    <table>
+        <thead>
+            <th>TODO task</th>
+            <th>done?</th>
+        </thead>
+        <tbody id="table-body" />
+    </table>
+    <button id="refresh">refresh data</button>
+</body>
+</html>

@@ -25,9 +25,9 @@ pub struct Conf {
     pub root: PathBuf,
     pub pages: PathBuf,
     pub errors: PathBuf,
-    pub components: PathBuf,
     pub layouts: PathBuf,
     pub dist: PathBuf,
+    pub include_base: PathBuf,
     pub rel_paths: RelPaths,
 }
 
@@ -90,9 +90,9 @@ pub fn parse(path: Option<&Path>) -> Result<Conf> {
         root: PathBuf::from(options.remove("root").unwrap_or(".")),
         pages: PathBuf::from(options.remove("pages").unwrap_or("pages/")),
         errors: PathBuf::from(options.remove("errors").unwrap_or("errors/")),
-        components: PathBuf::from(options.remove("components").unwrap_or("components/")),
         layouts: PathBuf::from(options.remove("layouts").unwrap_or("layouts/")),
         dist: PathBuf::from(options.remove("dist").unwrap_or("dist/")),
+        include_base: PathBuf::from(options.remove("include_base").unwrap_or("components/")),
         rel_paths: options.remove("rel_paths").unwrap_or("base").into(),
     };
 
