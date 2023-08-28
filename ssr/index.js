@@ -36,10 +36,11 @@ const dom = await JSDOM.fromFile(process.argv[2], {
     runScripts: "dangerously",
     resources: "usable",
     beforeParse: window => {
-        // declare the server context.
+        // server context.
         window.server = {
-            fs: fs,
+            active: true,
             imports: imports,
+            node: globalThis,
         };
 
         // hack to prevent `window.onload` being overwritten server-side
@@ -56,9 +57,8 @@ dom.window.eval("server.onload()");
 dom.window.eval(`
     document.head.insertAdjacentHTML(
         'afterbegin',
-        '<script>const server = {};</script>'
+        '<script>const server = { active: false };</script>'
     );
 `);
 
-// this output is pretty disgusting-ly formatted, but _ehhhhhh_
 fs.writeFileSync(process.argv[3], dom.serialize());
