@@ -1,32 +1,11 @@
+use std::{fs::{self, File}, path::PathBuf, io::Write};
+
 use anyhow::Result;
-use clap::{Parser, Subcommand};
-use std::{
-    fs,
-    path::{Path, PathBuf},
-    process,
-};
+use lazy_static::lazy_static;
+use regex::{Captures, Regex};
 
-use crate::directives::{get_all_directives, DirectiveVariants};
-
-mod conf;
-mod directives;
-
-#[derive(Subcommand)]
-enum Commands {
-    Build,
-    Check,
-    Serve,
-    Init,
-    New,
-}
-
-#[derive(Parser)]
-struct Args {
-    /// command to run
-    #[command(subcommand)]
-    command: Commands,
-    /// path to an alternative config. default: `rtc.conf`
-    config: Option<String>,
+lazy_static! {
+    static ref IMPORT_REG: Regex = Regex::new(r#"<!--\s*@component\s+["|']([^"|']*)["|']\s*-->"#).unwrap();
 }
 
 fn walk_dir(dir: &PathBuf) -> Result<Vec<PathBuf>> {
@@ -46,69 +25,30 @@ fn walk_dir(dir: &PathBuf) -> Result<Vec<PathBuf>> {
     Ok(entries)
 }
 
-fn check(page: &PathBuf, conf: &conf::Conf) -> bool {
-    let directives = get_all_directives(&page, &conf).unwrap_or_else(|e| {
-        eprintln!("error raised whilst aggregating directives:\n{}", e);
-        process::exit(1);
-    });
-    /*
-    if !directives
-        .iter()
-        .any(|d| matches!(d.variant, DirectiveVariants::Using(_)))
-    {
-        eprintln!(
-            "page '{}' does not use a template. ({})",
-            page.file_name().unwrap().to_str().unwrap(),
-            page.to_str().unwrap()
-        );
-        process::exit(1);
-    }
-    */
-    let mut errs = Vec::new();
-    for directive in directives {
-        match directive.variant {
-            DirectiveVariants::Include(path) => {
-                if !path.exists() {
-                    errs.push(format!(
-                        "file '{}' could not be included - it does not exist (raised in file '{}')",
-                        path.to_str().unwrap(),
-                        directive.file.to_str().unwrap()
-                    ));
-                }
-            }
-        }
-    }
+fn resolve(file: &PathBuf) -> String {
+    let contents = fs::read_to_string(&file).unwrap();
+    IMPORT_REG.replace_all(&contents, |capture: &Captures| {
+        let extract = &capture[1];
+        let path: PathBuf = [PathBuf::from("components/"), PathBuf::from(extract)].iter().collect();
 
-    for err in &errs {
-        eprintln!("{}", err);
-    }
-    return errs.is_empty();
+        if !path.exists() {
+            eprintln!("include directive given an invalid path: '{}'", extract);
+            eprintln!("error originated in file '{}'", &file.to_str().unwrap());
+            return String::new();
+        }
+
+        resolve(&path)
+    }).to_string()
 }
 
 fn main() {
-    let args = Args::parse();
-    let conf = conf::parse(args.config.as_ref().map(Path::new)).unwrap_or_else(|errs| {
-        eprintln!("errors whilst parsing args:\n{}", errs);
-        process::exit(1);
-    });
-    println!("config generated: {:#?}", conf);
-
-    match args.command {
-        Commands::Check => {
-            let pages = walk_dir(&conf.pages.clone().into()).unwrap();
-            let mut count = 0;
-            for page in &pages {
-                count += check(page, &conf) as usize;
-            }
-
-            println!(
-                "\n\nfound {} files, {} were valid, {} were not",
-                pages.len(),
-                count,
-                pages.len() - count
-            );
-        }
-        C
-        _ => unimplemented!(),
+    let dist = PathBuf::from("dist/");
+    let _ = fs::remove_dir_all(&dist);
+    for file in walk_dir(&PathBuf::from("pages/")).unwrap() {
+        let substituted = resolve(&file);
+        let path: PathBuf = [&dist, &file].iter().collect();
+        fs::create_dir_all(path.parent().unwrap()).unwrap();
+        let mut file = File::create(path).unwrap();
+        file.write_all(substituted.as_bytes()).unwrap();
     }
 }
