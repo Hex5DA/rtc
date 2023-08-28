@@ -10,7 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "jsdom": "^22.1.0",
-    "prettier": "^3.0.2"
+    "jsdom": "^22.1.0"
   }
 }

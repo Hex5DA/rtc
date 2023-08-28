@@ -1,5 +1,5 @@
-/target
-rtc.conf
-package-lock.json
+hpp/target
+hpp/rtc.conf
+ssr/package-lock.json
+ssr/node_modules
 examples/ssr/output.html
-examples/ssr/node_modules

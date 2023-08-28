@@ -5,7 +5,6 @@
 // - no slugs
 
 import { JSDOM } from "jsdom";
-import prettier from "prettier";
 import fs from "fs";
 
 if (process.argv.length != 4) {
@@ -40,5 +39,5 @@ dom.window.eval(`
     );
 `);
 
-const output = await prettier.format(dom.serialize(), { parser: "html" });
-fs.writeFileSync(process.argv[3], output);
+// this output is pretty disgusting-ly formatted, but _ehhhhhh_
+fs.writeFileSync(process.argv[3], dom.serialize());

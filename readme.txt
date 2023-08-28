@@ -1,169 +1,43 @@
-# Reset The Counter
+# RTC
 
-bear with me, i'm rethinking the project architecture
+Reset The Counter - a webdev toolchain miming a framework, providing a 'vanilla web' workflow.
 
-a micro-framework / HTML preprocessor i'm considering developing.
+RTC consitutes of currently 5 components, each of which aim to be independent from each other.
+components may be replaced with similar tools from outside the RTC toolchain (eg. trading RTC's CSL for `jquery`) or omitted entirely,
+making the suite extremely flexible.
 
-## scratchpad 
+## components
 
-- include a file with `<!--- @include <url> -->` (note the starting 3 `-`s!)
-- this HTML file doesn't need `html`, `body` or `head` tags. `style` and `script` can be top level
-  (note: this means `style` and `script` tags will be present in the main file's `body` :/)
-- todo: research import maps?
-- layouts, eg.
-  `page.html`
-  ```html
-  <!--- @include ./header.html -->
-  <p>this text is visible on every page using the layout!</p>
-  <!--- @slot -->
-  <!--- @include ./footer.html -->
-  ```
-  `index.html`
-  ```
-  <!--- @using ./page.rtcl -->
-  <p>this is inserted into the slot part :)</p>
-  ```
-- all pages must have a layout - however may be simple. eg.
-  `layouts/default.html`
-  ```html
-  <!DOCTYPE html />
-  <html>
-    <head>
-        <link href="styles/global.css" rel="stylesheet" />
-        <title>demo RTC website</title>
-    </head>
-    <body>
-        <!--- @slot -->
-    </body>
-  </html>
-  ```
-  `pages/index.html`
-  ```html
-  <!--- @using default.html -->
-  <h1>the index page!</h1>
-  <p>this will be substituted into the `@slot` element above.</p>
-  ```
+### `rtc-hpp` HTML preprocessor
 
-## ~~SSR~~
+a small preprocessor providing a layouts & includes (components, of a sort), for simple code re-use.
 
-this won't work.
+### `rtc-ssr` SSR tooling
 
-- advanced routing (with slugs?)
-- caching server side JS? (API similar to `setTimeout`)
-- consider doing SSR via HTML attributes (an [alpine](https://alpinejs.dev)-like approach)
+a micro-script to enable a primitive form of SSR.
+utilises `jsdom` to allow for DOM manipulation on the server, just as on the browser.
 
-## tooling
+### `rtc-css` CSS framework
 
-- command: `build`
-  find every page
-  resolve framework features:
-    - resolve `@includes`
-    - resolve `@using` (layouts)
-    - spit the static `html` files out into `dist/`
-      - follow the directory hierarchy
-        `pages/index.html` -> `dist/index.html`
-        `pages/url/index.html` -> dist/url/index.html`
-- command: `check`
-  find every page
-  for all framework features, ensure the files pointed to are valid
-    (they exist - no validating HTML / JS / CSS)
-  - todo (validate): ensure all `error/` pages are valid HTTP errors
-- command: `serve`
-  take `dist`, map out all the subdirectories
-  for each, begin listening on localhost:80 (or whatever the HTTP port is)
-  when a request comes through, serve the appropriate file
-  - todo: how would this run the relevant server-side JS / do slugs?
-  if not found, serve appropriate errors
-  - todo: `errors` directory? (eg. `error/404.html`, ect.)
-- command: `init`
-  generate an `rtc.conf`
-    - every rule is present, value is `default`
-  generate the directories, at their default values
-  generate an `pages/index.html` file and a `layouts/default.html` with sane content
-- command: `new [name]`
-  create a new directory, named `name`
-  change into this new directory, and run `init`
+a light CSS framework to provide _very_ basic sane defaults (opinionated to my personal style :wink: )
 
-## caveats & notes
+a lot of this is TBD. i might drop it alltogether.
 
-- caveat: css is not scoped.
-  - idiomacy: general CSS is discoraged (styling `*`, div, ect..)
-- fix: JS can be scoped using modules.
-  - caveat: cannot use members declared in other scripts
-    - fix, todo: research `this` / `globalThis` / `window`
 
-## project structure
+see:
+<https://readable-css.freedomtowrite.org/> &
+<https://0x5da.dev>
 
-```
-[root; default: `.`]
-|> rtc.conf?
-|- dist
-|- pages
-|  |- subdirectories
-|  |> *.html files (pages)
-|- errors
-|  |> [error code].html files (pages, displayed on errors)
-|- components
-|  |> *.html files (components)
-|- layouts
-|  |> *.html files (layouts)
-|- [styles]
-|- [assets]
-```
+### `rtc-fsr` file system router
 
-## config
+(name not final :) )
 
-`rtc.conf` file.
+a _very_ simple file-system based router with primitive slugging support.
 
-if a rule is not present, the default value is assumed.
-if a the `rtc.conf` file is not present, all rules are assumed.
+### `rtc-csl` client side library
 
-a line must follow either syntax:
-`rule: value`
--> rule is a string which must match a config option
--> value is a string which is handled by the program,
-   or the keyword `default`, which uses the default value specified below
-`//`
--> comment
--> the line is ignored
--> no inline / multiline comments (literally just a config file lol)
-``
--> whitespace
+TBD how this will work and what it will cover, but likely a `jquery`-like API for DOM manipulation.
 
-rules:
-- `root`
-  sets: the base directory other directories are calculated off of.
-  value: an alternative root directory.
-  default: `.`
-- `pages`, `errors`, `layouts`, `dist`
-  sets: respective directory
-  value: an alternative path for the respective directory. 
-  default: the respective name (eg. `pages/`)
-- `include_base`
-  sets: the path used to base includes
-  value: an alternative path
-  default: `components/`
-- rel_paths:
-  sets: how relative paths for directives will be calculated
-  values: `base` -> from the directory configured
-                    eg. the value specified by `components` or `layouts` (or the respctive defaults)
-          `root` -> from the project root, as defined by `root`
-          `[path]` -> from the specified path
-  default: `base`
-
-## directives
-
-- syntax:
-  `<!--- @[directive name] [args, if any] -->`
-- `include [path]`
-  include a file at `path`. defaults to 
-- `using [path]`
-  declares a page to be using a layout declared at `path`
-- `slot`
-  declares a layout slot.
-
-## libraries
-
-- a JS library to do framework stuff
-- `alpinejs` compatibility / clone?
+see:
+<https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML>
 

@@ -10,8 +10,8 @@ use crate::conf::Conf;
 #[derive(Debug, PartialEq, Eq)]
 pub enum DirectiveVariants {
     Include(PathBuf),
-    Using(PathBuf),
-    Slot,
+    // Using(PathBuf),
+    // Slot,
 }
 
 fn parse_path_arg(args: &mut Vec<&str>) -> Result<PathBuf> {
@@ -34,11 +34,13 @@ impl DirectiveVariants {
                 let rel = parse_path_arg(&mut args)?;
                 DirectiveVariants::Include([&conf.root, &conf.include_base, &rel].iter().collect())
             }
+            /*
             "using" => {
                 let rel = parse_path_arg(&mut args)?;
                 DirectiveVariants::Using([&conf.root, &conf.layouts, &rel].iter().collect())
             }
             "slot" => DirectiveVariants::Slot,
+            */
             uk => bail!("unknown directive: '{}'", uk),
         })
     }

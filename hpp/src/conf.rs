@@ -1,10 +1,15 @@
 #![allow(dead_code)]
 
 use anyhow::{bail, Context, Result};
-use std::{collections::HashMap, fs, path::{Path, PathBuf}};
+use std::{
+    collections::HashMap,
+    fs::{self, File},
+    path::{Path, PathBuf}, io::Write,
+};
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub enum RelPaths {
+    #[default]
     Base,
     Root,
     Arbritrary(String),
@@ -24,11 +29,23 @@ impl From<&str> for RelPaths {
 pub struct Conf {
     pub root: PathBuf,
     pub pages: PathBuf,
-    pub errors: PathBuf,
-    pub layouts: PathBuf,
+    // pub errors: PathBuf,
+    // pub layouts: PathBuf,
     pub dist: PathBuf,
     pub include_base: PathBuf,
     pub rel_paths: RelPaths,
+}
+
+impl Default for Conf {
+    fn default() -> Self {
+        Self {
+            root: PathBuf::from("."),
+            pages: PathBuf::from("pages/"),
+            dist: PathBuf::from("dist/"),
+            include_base: PathBuf::from("components/"),
+            rel_paths: RelPaths::default(),
+        }
+    }
 }
 
 fn blank_or_empty(str: &str) -> bool {
@@ -38,7 +55,10 @@ fn blank_or_empty(str: &str) -> bool {
 pub fn parse(path: Option<&Path>) -> Result<Conf> {
     let path = if let Some(path) = path {
         if !path.try_exists().context("file not readable")? {
-            bail!("specified config file '{}' does not exist", path.to_str().unwrap());
+            bail!(
+                "specified config file '{}' does not exist",
+                path.to_str().unwrap()
+            );
         }
         path
     } else {
@@ -46,11 +66,11 @@ pub fn parse(path: Option<&Path>) -> Result<Conf> {
     };
 
     let mut options = HashMap::new();
+    let mut errs = Vec::new();
     let contents;
     if path.exists() {
         contents = fs::read_to_string(path).context("error whilst reading from file")?;
         let lines = contents.split('\n').collect::<Vec<&str>>();
-        let mut errs = Vec::new();
 
         for (idx, line) in lines.iter().enumerate() {
             if blank_or_empty(line) {
@@ -85,23 +105,48 @@ pub fn parse(path: Option<&Path>) -> Result<Conf> {
         }
     }
 
-    #[rustfmt::skip]
+    let get_opt = |name| {
+        options.remove(name).unwrap_or_else(|| {
+            errs.push(format!("config option '{}' not found", name));
+            ""
+        })
+    };
+
     let conf = Conf {
-        root: PathBuf::from(options.remove("root").unwrap_or(".")),
-        pages: PathBuf::from(options.remove("pages").unwrap_or("pages/")),
-        errors: PathBuf::from(options.remove("errors").unwrap_or("errors/")),
-        layouts: PathBuf::from(options.remove("layouts").unwrap_or("layouts/")),
-        dist: PathBuf::from(options.remove("dist").unwrap_or("dist/")),
-        include_base: PathBuf::from(options.remove("include_base").unwrap_or("components/")),
-        rel_paths: options.remove("rel_paths").unwrap_or("base").into(),
+        root: get_opt("root").into(),
+        pages: get_opt("pages").into(),
+        // layouts: get_opt("layouts"),
+        dist: get_opt("dist").into(),
+        include_base: get_opt("include_base").into(),
+        rel_paths: get_opt("rel_paths").into(),
     };
 
     if !options.is_empty() {
-        bail!(
+        errs.push(format!(
             "unknown rules: {}",
             options.into_keys().collect::<Vec<&str>>().join(", ")
-        );
+        ));
+    }
+
+    if !errs.is_empty() {
+        bail!(errs.join("\n"));
     }
 
     Ok(conf)
 }
+
+static RTC_CONF_DEFAULT: &str = r"
+// you may want to change this to `src/`
+root: .
+pages: pages/
+dist: dist/
+include_base: components/
+rel_paths: base
+";
+
+fn generate_conf(path: &PathBuf) -> Result<()> {
+    let file = File::create(path).context("could not create config file - does it already exist?")?;
+    write!(file, "{}", RTC_CONF_DEFAULT);
+    Ok(())
+}
+
