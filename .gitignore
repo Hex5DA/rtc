@@ -1,5 +1,6 @@
 hpp/target
 hpp/rtc.conf
-ssr/package-lock.json
-ssr/node_modules
-examples/ssr/output.html
+
+package-lock.json
+node_modules
+output.html
