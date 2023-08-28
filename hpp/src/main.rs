@@ -1,11 +1,19 @@
-use std::{fs::{self, File}, path::PathBuf, io::Write};
+use std::{
+    fs::{self, File},
+    io::Write,
+    path::PathBuf,
+};
 
 use anyhow::Result;
 use lazy_static::lazy_static;
 use regex::{Captures, Regex};
 
 lazy_static! {
-    static ref IMPORT_REG: Regex = Regex::new(r#"<!--\s*@component\s+["|']([^"|']*)["|']\s*-->"#).unwrap();
+    static ref COMP_REG: Regex =
+        Regex::new(r#"<!--\s*@component\s+["|']([^"|']*)["|']\s*-->"#).unwrap();
+    static ref LAY_REG: Regex =
+        Regex::new(r#"<!--\s*@layout\s+["|']([^"|']*)["|']\s*-->"#).unwrap();
+    static ref SLOT_REG: Regex = Regex::new(r#"<!--\s*@slot\s*-->"#).unwrap();
 }
 
 fn walk_dir(dir: &PathBuf) -> Result<Vec<PathBuf>> {
@@ -25,30 +33,91 @@ fn walk_dir(dir: &PathBuf) -> Result<Vec<PathBuf>> {
     Ok(entries)
 }
 
-fn resolve(file: &PathBuf) -> String {
-    let contents = fs::read_to_string(&file).unwrap();
-    IMPORT_REG.replace_all(&contents, |capture: &Captures| {
-        let extract = &capture[1];
-        let path: PathBuf = [PathBuf::from("components/"), PathBuf::from(extract)].iter().collect();
+fn validate_path(
+    root: &PathBuf,
+    capture: &Captures,
+    file: &PathBuf,
+    directive: &str,
+) -> Option<PathBuf> {
+    let extract = &capture[1];
+    let path: PathBuf = [root, &PathBuf::from(extract)].iter().collect();
 
-        if !path.exists() {
-            eprintln!("include directive given an invalid path: '{}'", extract);
-            eprintln!("error originated in file '{}'", &file.to_str().unwrap());
-            return String::new();
+    if !path.exists() {
+        eprintln!(
+            "{} directive given an invalid path: '{}'",
+            directive, extract
+        );
+        eprintln!("error originated in file '{}'", &file.to_str().unwrap());
+        return None;
+    }
+    Some(path)
+}
+
+fn resolve_components(file: &PathBuf) -> String {
+    let contents = fs::read_to_string(&file).unwrap();
+    COMP_REG
+        .replace_all(&contents, |capture: &Captures| {
+            if let Some(path) =
+                validate_path(&PathBuf::from("components/"), capture, file, "component")
+            {
+                resolve_components(&path)
+            } else {
+                String::new()
+            }
+        })
+        .to_string()
+}
+
+fn ensure_one_capture<'a>(haystack: &'a String, reg: &Regex, file: &PathBuf, directive: &str) -> Option<Captures<'a>> {
+    match reg.captures_iter(&haystack).count() {
+        0 => {
+            eprintln!(
+                "file '{}' does not contain a {} directive",
+                file.to_str().unwrap(),
+                directive
+            );
+            return None;
+        }
+        1 => Some(reg.captures(&haystack).unwrap()),
+        num => {
+            eprintln!("files may only contain 1 {} directive.", directive);
+            eprintln!("('{}' was found to have {})", file.to_str().unwrap(), num);
+            return None;
+        }
+    }
+}
+
+fn resolve_layout(contents: String, file: &PathBuf) -> String {
+    let path_capture = if let Some(cap) = ensure_one_capture(&contents, &LAY_REG, file, "layout") {
+        cap
+    } else {
+        return contents;
+    };
+
+    if let Some(layout_path) =
+        validate_path(&PathBuf::from("layouts/"), &path_capture, file, "layout")
+    {
+        let layout_contents = resolve_components(&layout_path);
+        if ensure_one_capture(&layout_contents, &SLOT_REG, file, "slot").is_none() {
+            return contents;
         }
 
-        resolve(&path)
-    }).to_string()
+        return SLOT_REG.replace(&layout_contents, &contents).to_string();
+    } else {
+        return contents;
+    };
 }
 
 fn main() {
     let dist = PathBuf::from("dist/");
     let _ = fs::remove_dir_all(&dist);
     for file in walk_dir(&PathBuf::from("pages/")).unwrap() {
-        let substituted = resolve(&file);
+        let contents = resolve_components(&file);
+        let contents = resolve_layout(contents, &file);
+
         let path: PathBuf = [&dist, &file].iter().collect();
         fs::create_dir_all(path.parent().unwrap()).unwrap();
         let mut file = File::create(path).unwrap();
-        file.write_all(substituted.as_bytes()).unwrap();
+        file.write_all(contents.as_bytes()).unwrap();
     }
 }
