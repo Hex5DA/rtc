@@ -1,6 +1,6 @@
-hpp/target
 hpp/rtc.conf
 
 package-lock.json
+target
 node_modules
 output.html

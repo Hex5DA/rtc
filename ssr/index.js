@@ -38,8 +38,7 @@ const dom = await JSDOM.fromFile(process.argv[2], {
     beforeParse: window => {
         // server context.
         window.server = {
-            onload: () => {},
-            serverSide: true,
+            active: true,
             imports: imports,
             node: globalThis,
         };
@@ -58,7 +57,7 @@ dom.window.eval("server.onload()");
 dom.window.eval(`
     document.head.insertAdjacentHTML(
         'afterbegin',
-        '<script>const server = { serverSide: false };</script>'
+        '<script>const server = { active: false };</script>'
     );
 `);
 
