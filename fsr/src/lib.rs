@@ -1,12 +1,8 @@
-#![allow(dead_code)]
 // an implementation of the HTTP/1.1 standard, as presented here:
 // <https://datatracker.ietf.org/doc/html/rfc9112>
 // more resources on the HTTP specification can be found here:
 // <https://developer.mozilla.org/en-US/docs/Web/HTTP/Resources_and_specifications>
 
-use std::collections::VecDeque;
-use std::io::{prelude::*, BufReader};
-use std::net::TcpListener;
 use thiserror::Error;
 
 pub type Result<T> = std::result::Result<T, Errors>;
@@ -121,7 +117,7 @@ impl TryInto<ReqTarget> for String {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct HttpVersion(usize, usize);
 impl TryInto<HttpVersion> for String {
     type Error = Errors;
@@ -153,7 +149,11 @@ pub enum StartLine {
         http_version: HttpVersion,
     },
     // response
-    StatusLine {},
+    StatusLine {
+        http_version: HttpVersion,
+        status_code: usize,
+        reason_phrase: Option<String>,
+    },
 }
 
 // NOTE: what does this mean?
@@ -166,29 +166,77 @@ pub type Headers = std::collections::HashMap<String, String>;
 
 #[derive(Debug)]
 pub struct Message {
+    pub start_line: StartLine,
+    pub field_lines: Headers,
+    pub body: String,
+}
+
+pub struct MessageBuilder {
     start_line: StartLine,
     field_lines: Headers,
     body: String,
 }
 
-pub struct MessageParser {
-    request: String,
-    lines: VecDeque<String>,
-}
-
-impl MessageParser {
-    fn new(request: String) -> Self {
+impl MessageBuilder {
+    pub fn new() -> Self {
         Self {
-            lines: request
-                .clone()
-                .split_inclusive("\r\n")
-                .map(|s| s.to_string())
-                .collect(),
-            request,
+            start_line: StartLine::StatusLine {
+                http_version: HttpVersion(1, 1),
+                status_code: 200,
+                reason_phrase: Some("OK".to_string()),
+            },
+            field_lines: Headers::new(),
+            body: String::new(),
         }
     }
 
-    fn parse(&mut self) -> Result<Message> {
+    pub fn with_version(mut self, major: usize, minor: usize) -> Self {
+        match &mut self.start_line {
+            StartLine::RequestLine {
+                ref mut http_version, ..
+            } => *http_version = HttpVersion(major, minor),
+            StartLine::StatusLine {
+                ref mut http_version, ..
+            } => *http_version = HttpVersion(major, minor),
+        }
+        self
+    }
+
+    pub fn with_header(mut self, name: String, value: String) -> Self {
+        self.field_lines
+            .insert(name.trim().to_string(), value.trim().to_string());
+        self
+    }
+
+    pub fn with_body(mut self, body: String) -> Self {
+        self.body = body;
+        self
+    }
+
+    pub fn build(self) -> Message {
+        Message {
+            start_line: self.start_line,
+            field_lines: self.field_lines,
+            body: self.body,
+        }
+    }
+}
+
+pub struct MessageParser {
+    lines: std::collections::VecDeque<String>,
+}
+
+impl MessageParser {
+    pub fn new(request: String) -> Self {
+        Self {
+            lines: request
+                .split_inclusive("\r\n")
+                .map(|s| s.to_string())
+                .collect(),
+        }
+    }
+
+    pub fn parse(&mut self) -> Result<Message> {
         Ok(Message {
             start_line: self.parse_request_line()?,
             field_lines: self.parse_headers()?,
@@ -252,35 +300,5 @@ impl MessageParser {
             request_target,
             http_version,
         })
-    }
-}
-
-fn handle_err(_err: Errors) {
-    todo!()
-}
-
-pub fn listen(port: u64) {
-    let tcp = TcpListener::bind(format!("127.0.0.1:{}", port)).unwrap();
-
-    for stream in tcp.incoming() {
-        let mut reader = BufReader::new(stream.unwrap());
-        let buf = reader.fill_buf().unwrap().to_vec();
-        reader.consume(buf.len());
-        let msg = match String::from_utf8(buf) {
-            Ok(req) => match MessageParser::new(req).parse() {
-                Ok(msg) => msg,
-                Err(err) => {
-                    handle_err(err);
-                    continue;
-                }
-            },
-            Err(_err) => {
-                handle_err(Errors::NotValidUtf8);
-                continue;
-            }
-        };
-
-
-        println!("message: {:#?}", msg);
     }
 }
