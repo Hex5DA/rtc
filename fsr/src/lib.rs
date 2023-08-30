@@ -4,7 +4,7 @@
 // more resources on the HTTP specification can be found here:
 // <https://developer.mozilla.org/en-US/docs/Web/HTTP/Resources_and_specifications>
 
-use std::collections::HashMap;
+use std::collections::VecDeque;
 use std::io::{prelude::*, BufReader};
 use std::net::TcpListener;
 use thiserror::Error;
@@ -32,6 +32,14 @@ pub enum Errors {
     UnrecognisedReqTarget(String),
     #[error("HTTP version invalid - likely formatted incorrectly.")]
     InvalidHttpVersion,
+    #[error("invalid header name - contained whitespace")]
+    InvalidHeaderNameWhitespace,
+    #[error("invalid header - no delimiter")]
+    InvalidHeaderNoDel,
+    #[error("expected a '\\r\\n' token, eg. at the end of a request line")]
+    NoRnToken,
+    #[error("the request was not valid UTF-8")]
+    NotValidUtf8,
 }
 
 /// as defined here:
@@ -66,6 +74,7 @@ impl TryInto<Method> for String {
     }
 }
 
+// these are massively broken!
 #[derive(Debug)]
 pub enum ReqTarget {
     OriginForm {
@@ -92,7 +101,6 @@ impl TryInto<ReqTarget> for String {
         // this is unbelievably crude
         // if there's a `:`, and the part after it is a numbe,r we take it to be an AuthorityForm
         // (www.example.com:80), but if not, an absolute URL (https**:**//www.example.com).
-        // that's _awful_
         if self.contains(":") {
             let (lpart, rpart) = self.rsplit_once(":").unwrap();
             return Ok(match rpart.parse::<u64>() {
@@ -129,7 +137,10 @@ impl TryInto<HttpVersion> for String {
             return Err(Errors::InvalidHttpVersion);
         }
 
-        Ok(HttpVersion(nums[0].clone().unwrap(), nums[1].clone().unwrap()))
+        Ok(HttpVersion(
+            nums[0].clone().unwrap(),
+            nums[1].clone().unwrap(),
+        ))
     }
 }
 
@@ -151,43 +162,68 @@ pub enum StartLine {
 // ~ <https://datatracker.ietf.org/doc/html/rfc9112#name-message-parsing>
 // this should be fine, right? rust's unicode stirng's are supersets of ascii?
 
+pub type Headers = std::collections::HashMap<String, String>;
+
 #[derive(Debug)]
 pub struct Message {
     start_line: StartLine,
-    field_lines: HashMap<String, String>,
+    field_lines: Headers,
     body: String,
 }
 
-impl Message {
-    fn parse(request: Vec<String>) -> Result<Self> {
-        let mut parser = MessageParser { request };
-        parser.parse()
-    }
-}
-
 pub struct MessageParser {
-    request: Vec<String>,
+    request: String,
+    lines: VecDeque<String>,
 }
 
 impl MessageParser {
+    fn new(request: String) -> Self {
+        Self {
+            lines: request
+                .clone()
+                .split_inclusive("\r\n")
+                .map(|s| s.to_string())
+                .collect(),
+            request,
+        }
+    }
+
     fn parse(&mut self) -> Result<Message> {
-        let start_line = self.parse_start_line()?;
         Ok(Message {
-            start_line,
-            field_lines: HashMap::new(),
-            body: String::new(),
+            start_line: self.parse_request_line()?,
+            field_lines: self.parse_headers()?,
+            body: self
+                .lines
+                .clone()
+                .into_iter()
+                .collect::<Vec<String>>()
+                .join(""),
         })
     }
 
-    // TODO: we assume it will be a request-line -
-    //       perhaps we could try parsing status-lines here too?
-    fn parse_start_line(&mut self) -> Result<StartLine> {
-        let request_line = self
-            .request
-            .get(0)
-            .ok_or(Errors::NoStartLine)?
-            .split(" ")
-            .collect::<Vec<_>>();
+    fn parse_headers(&mut self) -> Result<Headers> {
+        let mut headers = Headers::new();
+        while let Some(line) = self.lines.pop_front() {
+            if line == "\r\n" {
+                break; // we have reached the message body
+            }
+            match line.split_once(":") {
+                None => return Err(Errors::InvalidHeaderNoDel),
+                Some((field_name, field_value)) => {
+                    if field_name.chars().any(|ch| ch.is_whitespace()) {
+                        return Err(Errors::InvalidHeaderNameWhitespace);
+                    }
+                    headers.insert(field_name.to_string(), field_value.trim().to_string());
+                }
+            }
+        }
+
+        Ok(headers)
+    }
+
+    fn parse_request_line(&mut self) -> Result<StartLine> {
+        let stfu_borrow_checker = self.lines.pop_front().ok_or(Errors::NoStartLine)?;
+        let request_line = stfu_borrow_checker.split(" ").collect::<Vec<_>>();
 
         if request_line.iter().any(|c| c.is_empty()) {
             return Err(Errors::UnecessaryWhitespaceInRequestLine);
@@ -206,6 +242,8 @@ impl MessageParser {
         let http_version = request_line
             .get(2)
             .ok_or(Errors::NoHttpVersion)?
+            .strip_suffix("\r\n")
+            .ok_or(Errors::NoRnToken)?
             .to_string()
             .try_into()?;
 
@@ -217,18 +255,32 @@ impl MessageParser {
     }
 }
 
+fn handle_err(_err: Errors) {
+    todo!()
+}
+
 pub fn listen(port: u64) {
     let tcp = TcpListener::bind(format!("127.0.0.1:{}", port)).unwrap();
 
     for stream in tcp.incoming() {
-        println!("client connected.");
-        let reader = BufReader::new(stream.unwrap());
-        let req = reader
-            .lines()
-            .map(|l| l.unwrap())
-            .take_while(|l| !l.is_empty())
-            .collect::<Vec<_>>();
+        let mut reader = BufReader::new(stream.unwrap());
+        let buf = reader.fill_buf().unwrap().to_vec();
+        reader.consume(buf.len());
+        let msg = match String::from_utf8(buf) {
+            Ok(req) => match MessageParser::new(req).parse() {
+                Ok(msg) => msg,
+                Err(err) => {
+                    handle_err(err);
+                    continue;
+                }
+            },
+            Err(_err) => {
+                handle_err(Errors::NotValidUtf8);
+                continue;
+            }
+        };
 
-        println!("message: {:?}", Message::parse(req).unwrap());
+
+        println!("message: {:#?}", msg);
     }
 }
