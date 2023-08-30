@@ -97,8 +97,8 @@ impl TryInto<ReqTarget> for String {
         // this is unbelievably crude
         // if there's a `:`, and the part after it is a numbe,r we take it to be an AuthorityForm
         // (www.example.com:80), but if not, an absolute URL (https**:**//www.example.com).
-        if self.contains(":") {
-            let (lpart, rpart) = self.rsplit_once(":").unwrap();
+        if self.contains(':') {
+            let (lpart, rpart) = self.rsplit_once(':').unwrap();
             return Ok(match rpart.parse::<u64>() {
                 Ok(port) => ReqTarget::AuthorityForm {
                     host: lpart.to_string(),
@@ -108,12 +108,12 @@ impl TryInto<ReqTarget> for String {
             });
         }
         let (mut path, mut query) = (self.clone(), None);
-        if self.contains("?") {
-            let (url, some_query) = self.rsplit_once("?").unwrap();
+        if self.contains('?') {
+            let (url, some_query) = self.rsplit_once('?').unwrap();
             (path, query) = (url.to_string(), Some(some_query.to_string()));
         }
 
-        return Ok(ReqTarget::OriginForm { path, query });
+        Ok(ReqTarget::OriginForm { path, query })
     }
 }
 
@@ -126,7 +126,7 @@ impl TryInto<HttpVersion> for String {
             .strip_prefix("HTTP/")
             .ok_or(Errors::InvalidHttpVersion)?;
         let nums = ver
-            .split(".")
+            .split('.')
             .map(|c| c.parse::<usize>())
             .collect::<Vec<_>>();
         if nums.len() != 2 || nums.iter().any(|n| n.is_err()) {
@@ -177,6 +177,12 @@ pub struct MessageBuilder {
     body: String,
 }
 
+impl Default for MessageBuilder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl MessageBuilder {
     pub fn new() -> Self {
         Self {
@@ -193,10 +199,12 @@ impl MessageBuilder {
     pub fn with_version(mut self, major: usize, minor: usize) -> Self {
         match &mut self.start_line {
             StartLine::RequestLine {
-                ref mut http_version, ..
+                ref mut http_version,
+                ..
             } => *http_version = HttpVersion(major, minor),
             StartLine::StatusLine {
-                ref mut http_version, ..
+                ref mut http_version,
+                ..
             } => *http_version = HttpVersion(major, minor),
         }
         self
@@ -255,7 +263,7 @@ impl MessageParser {
             if line == "\r\n" {
                 break; // we have reached the message body
             }
-            match line.split_once(":") {
+            match line.split_once(':') {
                 None => return Err(Errors::InvalidHeaderNoDel),
                 Some((field_name, field_value)) => {
                     if field_name.chars().any(|ch| ch.is_whitespace()) {
@@ -271,14 +279,14 @@ impl MessageParser {
 
     fn parse_request_line(&mut self) -> Result<StartLine> {
         let stfu_borrow_checker = self.lines.pop_front().ok_or(Errors::NoStartLine)?;
-        let request_line = stfu_borrow_checker.split(" ").collect::<Vec<_>>();
+        let request_line = stfu_borrow_checker.split(' ').collect::<Vec<_>>();
 
         if request_line.iter().any(|c| c.is_empty()) {
             return Err(Errors::UnecessaryWhitespaceInRequestLine);
         }
 
         let method = request_line
-            .get(0)
+            .first()
             .ok_or(Errors::NoMethod)?
             .to_string()
             .try_into()?;
