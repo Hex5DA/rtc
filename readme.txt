@@ -1,5 +1,19 @@
 # RTC
 
+## todo
+
+* clean up SSR as a binary
+* merge SSR/FSR2
+* FSR2 errors
+- use the phrase "composite framework" in this doc, because it sounds badass
+- oh yea come up with a name for that
+- test like hell
+- CSL/CSS
+- HPP config
+- whole project config
+? release some of these packages?
+? SSR errors? they suck atm (`DOMException`)
+
 Reset The Counter - a webdev toolchain miming a framework, providing a 'vanilla web' workflow.
 
 RTC consitutes of currently 5 components, each of which aim to be independent from each other.
