@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <script>
+        server.onload = () => {
+            const list = document.getElementById("list");
+            console.log(server.query);
+            for (slug of server.slugs) {
+                list.insertAdjacentHTML("beforend", `<li>${slug}</li>`);
+            }
+        };
+    </script>
+
+    <h1>testing SSR in RTC</h1>
+    <ul id="list" />
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <script>
+        server.onload = () => {
+            const list = document.getElementById("list");
+            for (const [key, value] of Object.entries(server.slugs)) {
+                list.insertAdjacentHTML("beforeend", `<li>${key}: ${value}</li>`);
+            }
+
+            const otherList = document.getElementById("other-list");
+            for (const [key, value] of Object.entries(server.query)) {
+                otherList.insertAdjacentHTML("beforeend", `<li>${key}: ${value}</li>`);
+            }
+        };
+    </script>
+
+    <h1>testing SSR in RTC</h1>
+    <p>slugs:</p>
+    <ul id="list"></ul>
+    <p>query:</p>
+    <ul id="other-list"></ul>
+</body>
+</html>

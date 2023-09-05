@@ -18,8 +18,10 @@ for (let i = 2; i < process.argv.length; i++) {
     }
 }
 
+/*
 if (args.positionals.length != 2) {
-    console.error("usage: script.js <input> <output> [--imports <file>]");
+    console.error("usage: script.js <input> [output] [--imports <file>]");
+    console.error("help: if _output_ is not present, the program will output to `stdout`");
     process.exit(1);
 }
 
@@ -28,38 +30,48 @@ if (args.named.imports !== undefined && !fs.existsSync(args.named.imports)) {
     process.exit(1);
 }
 
-const exists = filename => fs.existsSync(resolve(filename)) ? resolve(filename) : null; 
+const exists = filename => fs.existsSync(resolve(filename)) ? resolve(filename) : null;
 const importsPath = args.named.imports ? resolve(args.named.imports) : exists("imports.mjs") ?? exists("imports.js") ?? null;
 const imports = importsPath ? await import(`file://${importsPath}`) : {};
+*/
 
-const dom = await JSDOM.fromFile(process.argv[2], { 
-    runScripts: "dangerously",
-    resources: "usable",
-    beforeParse: window => {
-        // server context.
-        window.server = {
-            onload = () => {},
-            serverSide: true,
-            imports: imports,
-            node: globalThis,
-        };
+const imports = {};
+export async function ssrFile(path, slugs, query) {
+    const dom = await JSDOM.fromFile(path, {
+        runScripts: "dangerously",
+        resources: "usable",
+        beforeParse: window => {
+            // server context.
+            window.server = {
+                onload: () => { },
+                slugs: slugs,
+                query: query,
+                serverSide: true,
+                imports: imports,
+                node: globalThis,
+            };
 
-        // hack to prevent `window.onload` being overwritten server-side
-        // this stops browser-side code being executed :)
-        Object.defineProperty(window, "onload", {
-            value: () => {},
-            enumerable: true,
-        });
-    },
-});
+            // hack to prevent `window.onload` being overwritten server-side
+            // this stops browser-side code being executed :)
+            Object.defineProperty(window, "onload", {
+                value: () => { },
+                enumerable: true,
+            });
+        },
+    });
 
-dom.window.eval("server.onload()");
-// glue to define `server` for the browser page, to prevent an error.
-dom.window.eval(`
-    document.head.insertAdjacentHTML(
-        'afterbegin',
-        '<script>const server = { serverSide: false };</script>'
-    );
-`);
+    dom.window.eval("server.onload()");
+    // browser polyfill
+    dom.window.eval(`
+        document.head.insertAdjacentHTML(
+            'afterbegin',
+            '<script>const server = { serverSide: false };</script>'
+        );
+    `);
+    return dom.serialize();
+}
 
-fs.writeFileSync(process.argv[3], dom.serialize());
+/*
+const dom = await ssrFile(args.positionals[0], args.named.slugs, args.named.query);
+fs.writeFileSync(args.positionals[1], dom.serialize());
+*/
