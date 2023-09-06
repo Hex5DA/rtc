@@ -4,62 +4,51 @@
 
 after birds, because birdies :)
 
-`eider` HTML
-`fulmar` JS 
+`eider` HTML*
 `skua` CSS 
+`fulmar` JS*
 `tern` router
+
+*TODO: consider renaming? they sound kinda lame
 
 ## todo
 
-* clean up SSR as a binary
-* merge SSR/FSR2
-* FSR2 errors
-- use the phrase "composite framework" in this doc, because it sounds badass
-- oh yea come up with a name for that
-- test like hell
+* config
 - CSL/CSS
-- HPP config
-- whole project config
 ? release some of these packages?
-? SSR errors? they suck atm (`DOMException`)
+? investigate more helpful SSR errors?
+  - note: `DOMException`
+  ? wrap DOM with custom errors
 
-Reset The Counter - a webdev toolchain miming a framework, providing a 'vanilla web' workflow.
+Reset The Counter - a composite framework with an emphasis of simplicity which emulates the vanilla web.
 
-RTC consitutes of currently 5 components, each of which aim to be independent from each other.
-components may be replaced with similar tools from outside the RTC toolchain (eg. trading RTC's CSL for `jquery`) or omitted entirely,
-making the suite extremely flexible.
+RTC consitutes of 4 components, each of which aim to be (mostly) independent from each other.
+components may be replaced with similar tools from outside the RTC toolchain (eg. trading `fulmar` for `jquery`) or omitted entirely,
+making the framework extremely flexible.
 
 ## components
 
-### `rtc-hpp` HTML preprocessor
+### `eider` (HTML preprocessor)
 
-a small preprocessor providing a layouts & includes (components, of a sort), for simple code re-use.
+a small preprocessor providing a layouts & includes (components, of a sort), for code re-use.
 
-### `rtc-ssr` SSR tooling
+### `tern` (SSR, FS-based router)
 
-a micro-script to enable a primitive form of SSR.
-utilises `jsdom` to allow for DOM manipulation on the server, just as on the browser.
+SSR support which utilises `jsdom` to allow for DOM manipulation on the server, just as on the browser.
+combined with a router operating on the filesystem, with support for slugs, arbitrary `nodejs` packages, query paramaters & custom errors.
 
-### `rtc-css` CSS framework
+### `skua` (CSS framework)
 
-a light CSS framework to provide _very_ basic sane defaults (opinionated to my personal style :wink: )
-
-a lot of this is TBD. i might drop it alltogether.
-
+a minimal CSS framework providing sane defaults (opinionated to my personal style :wink: )
 
 see:
 <https://readable-css.freedomtowrite.org/> &
 <https://0x5da.dev>
 
-### `rtc-fsr` file system router
+### `fulmar` (client side library)
 
-(name not final :) )
-
-a _very_ simple file-system based router with primitive slugging support.
-
-### `rtc-csl` client side library
-
-TBD how this will work and what it will cover, but likely a `jquery`-like API for DOM manipulation.
+TBD!
+a lightweight CSL to ease DOM maipulation, reduce boilerplate & prevent common pitfalls.
 
 see:
 <https://developer.mozilla.org/en-US/docs/Web/API/Element/insertAdjacentHTML>

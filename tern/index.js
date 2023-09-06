@@ -5,31 +5,17 @@ import fs from "fs";
 import path, { resolve } from "path";
 
 import { ssrFile } from "./ssr.js";
+import * as lib from "./lib.js";
+const exists = lib.exists;
 
-const args = { named: {}, positionals: [] };
-for (let i = 2; i < process.argv.length; i++) {
-    const arg = process.argv[i];
-    if (arg.startsWith("--")) {
-        args.named[arg.slice(2)] = process.argv[++i];
-    } else {
-        args.positionals.push(arg);
-    }
-}
-
+const args = lib.parseArgs(process.argv);
 if (args.positionals.length !== 1) {
     console.error("usage: index.js <source directory> [--imports <file>]");
     process.exit(1);
 }
 
-if (args.named.imports !== undefined && !fs.existsSync(args.named.imports)) {
-    console.error(`error: specified imports file '${args.named.imports}' does not exist`);
-    process.exit(1);
-}
-
 const sourceDir = resolve(args.positionals[0]);
-const exists = filename => fs.existsSync(resolve(filename)) ? resolve(filename) : null;
-const importsPath = args.named.imports ? resolve(args.named.imports) : exists("imports.mjs") ?? exists("imports.js") ?? null;
-const imports = importsPath ? await import(`file://${importsPath}`) : {};
+const imports = lib.getImports(args.named.imports);
 
 function errPage(code, reason) {
     return `
@@ -100,22 +86,22 @@ for (const file of files) {
         const rawUrl = strStripEnd(base, "index") ?? base;
         const url = rawUrl.replaceAll(re, (_, cap) => `:${cap}`);
 
-        app.get(`/${url}`, async (req, res, next) => {
-            const contents = await ssrFile(filePath, req.params, req.query, imports);
+        app.get(`/${url}`, async (req, res, _next) => {
+            const contents = await ssrFile(filePath, imports, req.params, req.query);
             res.contentType("text/html").send(contents);
         });
     }
 }
 
-// custom 404
 const err404Path = exists(`${sourceDir}/404.html`) ?? exists(`${sourceDir}/errors/404.html`) ?? null;
-const err500Path = exists(`${sourceDir}/500.html`) ?? exists(`${sourceDir}/errors/500.html`) ?? null;
 const err404 = err404Path ? fs.readFileSync(err404Path) : errPage(404, "page not found");
+const err500Path = exists(`${sourceDir}/500.html`) ?? exists(`${sourceDir}/errors/500.html`) ?? null;
 const err500 = err500Path ? fs.readFileSync(err500Path) : errPage(500, "internal server error");
 
 app.use((_req, res) => {
     res.status(404).contentType("text/html").send(err404);
 });
+// do we bother implementing arbritrary errors? (see: <https://auth0.com/blog/how-to-implement-custom-error-responses-in-expressjs/>)
 app.use((err, _req, res, _next) => {
     console.error(`server error:\n${err}`);
     res.status(500).contentType("text/html").send(err500);
