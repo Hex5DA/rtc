@@ -31,6 +31,50 @@ const exists = filename => fs.existsSync(resolve(filename)) ? resolve(filename) 
 const importsPath = args.named.imports ? resolve(args.named.imports) : exists("imports.mjs") ?? exists("imports.js") ?? null;
 const imports = importsPath ? await import(`file://${importsPath}`) : {};
 
+function errPage(code, reason) {
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>${code}</title>
+    <style>
+    * {
+        font-family: monospace;
+        font-size: 100%;
+        margin: 0;
+    }
+
+    body {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2vh;
+    }
+
+    h1 {
+        font-size: 4vw;
+        border-bottom: black solid 6px;
+        padding: 0 1.5vw; 
+        font-weight: bold;
+        text-align: center;
+    }
+
+    p {
+        margin: 0;
+        font-size: 2vw;
+    }
+    </style>
+</head>
+<body>
+    <h1>error - code ${code}</h1>
+    <p><i>${reason}</i></p>
+</body>
+</html>
+    `;
+}
+
 const app = express();
 const re = /\[([\w ]+)\]/g;
 
@@ -56,12 +100,26 @@ for (const file of files) {
         const rawUrl = strStripEnd(base, "index") ?? base;
         const url = rawUrl.replaceAll(re, (_, cap) => `:${cap}`);
 
-        app.get(`/${url}`, async (req, res) => {
+        app.get(`/${url}`, async (req, res, next) => {
             const contents = await ssrFile(filePath, req.params, req.query, imports);
             res.contentType("text/html").send(contents);
         });
     }
 }
+
+// custom 404
+const err404Path = exists(`${sourceDir}/404.html`) ?? exists(`${sourceDir}/errors/404.html`) ?? null;
+const err500Path = exists(`${sourceDir}/500.html`) ?? exists(`${sourceDir}/errors/500.html`) ?? null;
+const err404 = err404Path ? fs.readFileSync(err404Path) : errPage(404, "page not found");
+const err500 = err500Path ? fs.readFileSync(err500Path) : errPage(500, "internal server error");
+
+app.use((_req, res) => {
+    res.status(404).contentType("text/html").send(err404);
+});
+app.use((err, _req, res, _next) => {
+    console.error(`server error:\n${err}`);
+    res.status(500).contentType("text/html").send(err500);
+});
 
 const port = args.named.port ?? 8080;
 app.listen(port, () => {
