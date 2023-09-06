@@ -1,5 +1,14 @@
 # RTC
 
+## names
+
+after birds, because birdies :)
+
+`eider` HTML
+`fulmar` JS 
+`skua` CSS 
+`tern` router
+
 ## todo
 
 * clean up SSR as a binary
