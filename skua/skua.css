@@ -44,6 +44,8 @@ html {
     text-align: justify;
     font-size: 18px;
     line-height: 1.5;
+
+    font-family: sans-serif;
 }
 
 html[data-font="monospace"] {
