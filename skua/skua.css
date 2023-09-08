@@ -9,17 +9,31 @@
 
     --bg: var(--dbg);
     --fg: var(--dfg);
+    --a: var(--da);
     --na: var(--la);
 
-    --pgw: 60vw;
+    --pgw: 90vw;
+}
+
+@media screen and (min-width: 1100px) {
+    :root {
+        --pgw: 80ch;
+    }
 }
 
 @media (prefers-color-scheme: light) {
     :root {
         --bg: var(--lbg);
         --fg: var(--lfg);
+        --a: var(--la);
         --na: var(--da);
     }
+}
+
+html, main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 html {
@@ -27,12 +41,9 @@ html {
     background-color: var(--bg);
     color: var(--fg);
 
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-
     text-align: justify;
-    font-size: 1.5vw;
+    font-size: 18px;
+    line-height: 1.5;
 }
 
 html[data-font="monospace"] {
@@ -41,10 +52,47 @@ html[data-font="monospace"] {
 
 body {
     width: var(--pgw);
-
 }
 
-h1, h2, h3 {
+h1, h2, h3, h4, h5, h6 {
     text-align: center;
+}
+
+/* tables */
+
+table {
+    border-collapse: collapse;
+    padding: 10px;
+}
+
+td, th {
+    padding: 5px 20px;
+}
+
+tr {
+    transition: background-color ease-in .4s;
+}
+
+td + td, th + th {
+    border-left: 2px solid var(--fg);
+}
+
+thead, th {
+    border-bottom: 2px solid var(--fg);
+}
+
+table caption {
+    font-style: italic;
+    margin-bottom: 5px;
+}
+
+tbody tr:nth-child(even) { background-color: var(--a); }
+tbody tr:nth-child(even):hover { 
+    background-color: var(--bg);
+    border: solid 2px var(--a); 
+}
+tbody tr:hover {
+    background-color: var(--a);
+    border: solid 2px var(--bg); 
 }
 
