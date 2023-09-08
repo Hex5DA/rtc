@@ -1,0 +1,50 @@
+:root {
+    --lbg: #F8F0E3;
+    --lfg: #272d35;
+    --la: #ead1aa;
+
+    --dbg: #1c1d1d;
+    --dfg: #c5c8c6;
+    --da: #181919;
+
+    --bg: var(--dbg);
+    --fg: var(--dfg);
+    --na: var(--la);
+
+    --pgw: 60vw;
+}
+
+@media (prefers-color-scheme: light) {
+    :root {
+        --bg: var(--lbg);
+        --fg: var(--lfg);
+        --na: var(--da);
+    }
+}
+
+html {
+    height: 100vh;
+    background-color: var(--bg);
+    color: var(--fg);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    text-align: justify;
+    font-size: 1.5vw;
+}
+
+html[data-font="monospace"] {
+    font-family: monospace;
+}
+
+body {
+    width: var(--pgw);
+
+}
+
+h1, h2, h3 {
+    text-align: center;
+}
+

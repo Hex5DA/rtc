@@ -1,16 +1,5 @@
 # RTC
 
-## names
-
-after birds, because birdies :)
-
-`eider` HTML*
-`skua` CSS 
-`fulmar` JS*
-`tern` router
-
-*TODO: consider renaming? they sound kinda lame
-
 ## todo
 
 * config
@@ -23,12 +12,12 @@ after birds, because birdies :)
 Reset The Counter - a composite framework with an emphasis of simplicity which emulates the vanilla web.
 
 RTC consitutes of 4 components, each of which aim to be (mostly) independent from each other.
-components may be replaced with similar tools from outside the RTC toolchain (eg. trading `fulmar` for `jquery`) or omitted entirely,
+components may be replaced with similar tools from outside the RTC toolchain (eg. trading our CSL for `jquery`) or omitted entirely,
 making the framework extremely flexible.
 
 ## components
 
-### `eider` (HTML preprocessor)
+### `smew` (HTML preprocessor)
 
 a small preprocessor providing a layouts & includes (components, of a sort), for code re-use.
 
@@ -45,7 +34,7 @@ see:
 <https://readable-css.freedomtowrite.org/> &
 <https://0x5da.dev>
 
-### `fulmar` (client side library)
+### `falcon` (client side library)
 
 TBD!
 a lightweight CSL to ease DOM maipulation, reduce boilerplate & prevent common pitfalls.

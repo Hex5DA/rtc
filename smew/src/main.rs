@@ -112,10 +112,12 @@ fn main() {
     let dist = PathBuf::from("dist/");
     let _ = fs::remove_dir_all(&dist);
     for file in walk_dir(&PathBuf::from("pages/")).unwrap() {
+        println!("start: {}", file.display());
         let contents = resolve_components(&file);
         let contents = resolve_layout(contents, &file);
 
-        let path: PathBuf = [&dist, &file].iter().collect();
+        // TODO: HACK: eww
+        let path: PathBuf = [&dist, file.strip_prefix("pages/").unwrap()].iter().collect();
         fs::create_dir_all(path.parent().unwrap()).unwrap();
         let mut file = File::create(path).unwrap();
         file.write_all(contents.as_bytes()).unwrap();
