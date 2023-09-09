@@ -1,8 +1,21 @@
 <!DOCTYPE html>
-<html data-font="monospace">
+<html>
 <head>
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="skua.css" />
+    <script>
+    let dark;
+    window.onload = () => {
+        const button = document.getElementById("theme-toggle");
+        const html = document.getElementsByTagName("html")[0];
+        button.onclick = () => {
+            if (!dark) html.getAttribute("data-theme") !== "dark";
+            const theme = dark ? "dark" : "light";
+            html.setAttribute("data-theme", theme);
+            dark = !dark;
+        };
+    };
+    </script>
 </head>
 <body>
     <header>
@@ -73,7 +86,7 @@ Etiam felis leo, porta eget nulla eget, tincidunt tincidunt turpis. Nulla sapien
             </ol>
 
             <p>click the button below!</p>
-            <button>click me!</button>
+            <button id="theme-toggle">click me!</button>
         </section>
     </main>
     <footer>
