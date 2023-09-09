@@ -16,23 +16,6 @@
     --max-page-width: 80ch;
 }
 
-@media screen and (min-width: 1500px) {
-    aside {
-        margin-bottom: 0 !important;
-        width: 30ch;
-    }
-
-    main > aside:nth-of-type(odd) {
-        margin-left: 2ch;
-        float: right;
-    }
-
-    main > aside:nth-of-type(even) {
-        float: left;
-        margin-right: 2ch;
-    }
-}
-
 @media (prefers-color-scheme: light) {
     :root {
         --bg: var(--lbg);
@@ -42,26 +25,13 @@
     }
 }
 
-aside {
-    border: 2px solid var(--fg);
-    padding: 15px;
-    background-color: var(--a);
-    border-radius: 10px;
-}
-
-aside > * {
-    padding: 0;
-    margin: 0;
-}
-
-aside > :is(h1, h2, h3, h4, h5, h6) {
-    text-align: unset;
-}
+/* general layout shenanigans */
 
 body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin: 0;
 }
 
 html {
@@ -93,6 +63,43 @@ h1, h2, h3, h4, h5, h6 {
     text-align: center;
 }
 
+/* semantic layouts elements */
+
+@media screen and (min-width: 1500px) {
+    aside {
+        margin-bottom: 0 !important;
+        width: 30ch;
+    }
+
+    main > aside:nth-of-type(odd) {
+        margin-left: 2ch;
+        float: right;
+    }
+
+    main > aside:nth-of-type(even) {
+        float: left;
+        margin-right: 2ch;
+    }
+}
+
+aside {
+    border: 2px solid var(--fg);
+    padding: 15px;
+    background-color: var(--a);
+    border-radius: 10px;
+}
+
+aside > * {
+    padding: 0;
+    margin: 0;
+}
+
+aside > :is(h1, h2, h3, h4, h5, h6) {
+    text-align: unset;
+}
+
+/* utility classes */
+
 figure, .center {
     width: fit-content;
     margin-right: auto;
@@ -112,7 +119,8 @@ ol {
     list-style-type: decimal-leading-zero;
 }
 
-/* figures */
+/* figures & tables */
+
 table {
     border-collapse: collapse;
 }
@@ -140,7 +148,9 @@ table caption, figcaption {
     border-left: 2px solid var(--fg);
 }
 
-tbody tr:nth-child(even) { background-color: var(--a); }
+tbody tr:nth-child(even) {
+    background-color: var(--a);
+}
 tbody tr:nth-child(even):hover { 
     background-color: var(--bg);
     border: solid 2px var(--a); 
@@ -158,5 +168,40 @@ button {
     padding: 10px;
     border: 2px var(--fg) solid;
     border-radius: 10px;
+}
+
+/* header & footer */
+
+header {
+    position: sticky;
+    top: 0;
+
+    padding: .4rem;
+    transition: all ease-in-out 1s;
+    backdrop-filter: blur(10px) grayscale(1) brightness(0.9);
+    border-bottom: 2px solid var(--a);
+}
+
+footer {
+    position: relative;
+    bottom: 0;
+    padding: .6rem;
+    background-color: var(--a);
+}
+
+header, footer {
+    box-sizing: border-box;
+    width: 100vw;
+    
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+
+}
+
+header > * {
+    padding: 0;
+    margin: 0;
 }
 
