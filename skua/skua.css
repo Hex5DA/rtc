@@ -88,6 +88,19 @@ a:visited {
     color: var(--na);
 }
 
+q {
+    font-style: italic;
+}
+
+blockquote {
+    padding: 10px;
+    background-color: var(--a);
+    white-space: pre-line;
+    border-radius: 10px;
+    width: calc(var(--max-page-width) * 0.75)
+    margin: 0 auto;
+}
+
 /* semantic layouts elements */
 
 @media screen and (min-width: 1500px) {
