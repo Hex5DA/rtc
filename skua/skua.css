@@ -1,4 +1,5 @@
 :root {
+
     --lbg: #F8F0E3;
     --lfg: #272d35;
     --la: #ead1aa;
@@ -11,13 +12,24 @@
     --fg: var(--dfg);
     --a: var(--da);
     --na: var(--la);
-
-    --pgw: 90vw;
+    --flair: var(--fg);
+    --max-page-width: 80ch;
 }
 
-@media screen and (min-width: 1100px) {
-    :root {
-        --pgw: 80ch;
+@media screen and (min-width: 1500px) {
+    aside {
+        margin-bottom: 0 !important;
+        width: 30ch;
+    }
+
+    main > aside:nth-of-type(odd) {
+        margin-left: 2ch;
+        float: right;
+    }
+
+    main > aside:nth-of-type(even) {
+        float: left;
+        margin-right: 2ch;
     }
 }
 
@@ -30,7 +42,23 @@
     }
 }
 
-html, main {
+aside {
+    border: 2px solid var(--fg);
+    padding: 15px;
+    background-color: var(--a);
+    border-radius: 10px;
+}
+
+aside > * {
+    padding: 0;
+    margin: 0;
+}
+
+aside > :is(h1, h2, h3, h4, h5, h6) {
+    text-align: unset;
+}
+
+body {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -48,23 +76,45 @@ html {
     font-family: sans-serif;
 }
 
-html[data-font="monospace"] {
+html[data-font="monospace"], html[data-font="monospace"] button {
     font-family: monospace;
 }
 
-body {
-    width: var(--pgw);
+main {
+    width: 90vw;
+    max-width: var(--max-page-width);
+}
+
+main > * {
+    margin-bottom: 1rem;
 }
 
 h1, h2, h3, h4, h5, h6 {
     text-align: center;
 }
 
-/* tables */
+figure, .center {
+    width: fit-content;
+    margin-right: auto;
+    margin-left: auto;
+}
 
+button, .highlight {
+    transition: all ease-in .4s;
+}
+
+button:hover, .highlight:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 20px -5px var(--flair);
+}
+
+ol {
+    list-style-type: decimal-leading-zero;
+}
+
+/* figures */
 table {
     border-collapse: collapse;
-    padding: 10px;
 }
 
 td, th {
@@ -83,9 +133,11 @@ thead, th {
     border-bottom: 2px solid var(--fg);
 }
 
-table caption {
+table caption, figcaption {
     font-style: italic;
-    margin-bottom: 5px;
+    margin: 10px auto;
+    padding-left: 10px;
+    border-left: 2px solid var(--fg);
 }
 
 tbody tr:nth-child(even) { background-color: var(--a); }
@@ -96,5 +148,15 @@ tbody tr:nth-child(even):hover {
 tbody tr:hover {
     background-color: var(--a);
     border: solid 2px var(--bg); 
+}
+
+/* buttons & forms */
+
+button {
+    background-color: var(--a);
+    color: var(--fg);
+    padding: 10px;
+    border: 2px var(--fg) solid;
+    border-radius: 10px;
 }
 
