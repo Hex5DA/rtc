@@ -97,13 +97,13 @@ blockquote {
     background-color: var(--a);
     white-space: pre-line;
     border-radius: 10px;
-    width: calc(var(--max-page-width) * 0.75)
+    width: calc(var(--max-page-width) * 0.75);
     margin: 0 auto;
 }
 
 /* semantic layouts elements */
 
-@media screen and (min-width: 1500px) {
+@media screen and (min-width: 1000px) {
     aside {
         margin-bottom: 0 !important;
         width: 30ch;
