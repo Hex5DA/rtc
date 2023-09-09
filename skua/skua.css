@@ -39,11 +39,22 @@ html {
     background-color: var(--bg);
     color: var(--fg);
 
+    font-family: sans-serif;
     text-align: justify;
     font-size: 18px;
     line-height: 1.5;
 
-    font-family: sans-serif;
+    /* gecko */
+    scrollbar-color: var(--fg) var(--a);
+    overflow: scroll;
+}
+
+/* blink & webkit */
+html::-webkit-scrollbar {
+    background-color: var(--a);
+}
+html::-webkit-scrollbar-thumb {
+    background-color: var(--fg);
 }
 
 html[data-font="monospace"], html[data-font="monospace"] button {
@@ -61,6 +72,20 @@ main > * {
 
 h1, h2, h3, h4, h5, h6 {
     text-align: center;
+}
+
+a {
+    text-decoration: underline solid 2px;
+    outline: none;
+    color: var(--fg);
+}
+
+a:hover {
+    text-decoration: underline dashed 2px;
+}
+
+a:visited {
+    color: var(--na);
 }
 
 /* semantic layouts elements */
@@ -170,16 +195,18 @@ button {
     border-radius: 10px;
 }
 
-/* header & footer */
+/* header, footer & nav */
 
 header {
     position: sticky;
     top: 0;
 
-    padding: .4rem;
-    transition: all ease-in-out 1s;
+    padding: .4rem 1rem;
+    transition: backdrop-filter ease-in-out 1s;
     backdrop-filter: blur(10px) grayscale(1) brightness(0.9);
     border-bottom: 2px solid var(--a);
+    z-index: 100;
+    justify-content: space-between;
 }
 
 footer {
@@ -203,5 +230,20 @@ header, footer {
 header > * {
     padding: 0;
     margin: 0;
+}
+
+:not(header) > nav {
+    display: flex;
+    justify-content: space-around;
+
+    width: var(--max-page-width);
+    border-bottom: 2px solid var(--fg);
+}
+
+:not(header) > nav > * {
+    font-size: 1.4rem;
+}
+:not(header) > nav > a {
+    text-decoration: none;
 }
 
