@@ -108,7 +108,7 @@ blockquote {
     background-color: var(--a);
     white-space: pre-line;
     border-radius: 10px;
-    width: calc(var(--max-page-width) * 0.75);
+    width: 85%;
     margin: 0 auto;
 }
 
