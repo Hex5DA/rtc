@@ -2,6 +2,7 @@ import { JSDOM } from "jsdom";
 import fs from "fs";
 
 import * as lib from "./lib.js";
+import { resolve } from "path";
 
 if (lib.runAsMain(import.meta.url, process.argv)) {
     const args = lib.parseArgs(process.argv);
@@ -24,6 +25,7 @@ export async function ssrFile(path, imports, slugs, query) {
     const dom = await JSDOM.fromFile(path, {
         runScripts: "dangerously",
         resources: "usable",
+        url: `file://${resolve("dist/")}`,
         beforeParse: window => {
             // server context.
             window.server = {
@@ -44,14 +46,16 @@ export async function ssrFile(path, imports, slugs, query) {
         },
     });
 
-    dom.window.eval("server.onload()");
-    // browser polyfill
-    dom.window.eval(`
-        document.head.insertAdjacentHTML(
-            'afterbegin',
-            '<script>const server = { serverSide: false };</script>'
-        );
-    `);
+    dom.window.addEventListener("DOMContentLoaded", () => {
+        dom.window.eval("server.onload()");
+        // browser polyfill
+        dom.window.eval(`
+            document.head.insertAdjacentHTML(
+                'afterbegin',
+                '<script>const server = { serverSide: false };</script>'
+            );
+        `);
+    });
 
     return dom.serialize();
 }
