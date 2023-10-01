@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <script>
+    window.addEventListener("load", () => {
+        document.getElementById("test").insertAdjacentHTML("afterend", "<p>browser</p>");
+    });
+    server.onload = () => {
+        console.log("server; index.html");
+        document.getElementById("test").insertAdjacentHTML("afterend", "<p>server</p>");
+    };
+    </script>
+
+
+    <p id="test">one</p>
+</body>
+</html>

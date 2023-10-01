@@ -34,3 +34,4 @@ export function runAsMain(meta, argv) {
     return meta === url;
 }
 
+export const sleep = timeout => new Promise(r => setTimeout(r, timeout));

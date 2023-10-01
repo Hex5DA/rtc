@@ -16,12 +16,13 @@ if (lib.runAsMain(import.meta.url, process.argv)) {
 
     const dom = await ssrFile(args.positionals[0], imports);
     if (args.positionals[1])
-        fs.writeFileSync(args.positionals[1], dom.serialize());
+        fs.writeFileSync(args.positionals[1], dom);
     else
         console.log(dom);
 }
 
 export async function ssrFile(path, imports, slugs, query) {
+    let domDone = false;
     const dom = await JSDOM.fromFile(path, {
         runScripts: "dangerously",
         resources: "usable",
@@ -34,6 +35,8 @@ export async function ssrFile(path, imports, slugs, query) {
                 query: query ?? {},
                 serverSide: true,
                 node: globalThis,
+                /** @param {bool} value */
+                set done(value) { domDone = value; },
                 onload: () => { },
             };
 
@@ -46,17 +49,19 @@ export async function ssrFile(path, imports, slugs, query) {
         },
     });
 
-    dom.window.addEventListener("DOMContentLoaded", () => {
-        dom.window.eval("server.onload()");
-        // browser polyfill
-        dom.window.eval(`
-            document.head.insertAdjacentHTML(
-                'afterbegin',
-                '<script>const server = { serverSide: false };</script>'
-            );
-        `);
-    });
+    dom.window.eval(`
+        window.addEventListener("load", () => {
+            server.onload();
+            server.done = true;
+        });
 
+        document.head.insertAdjacentHTML(
+            'afterbegin',
+            '<script>const server = { serverSide: false };</script>'
+        );
+    `);
+
+    while (!domDone) await lib.sleep(20);
     return dom.serialize();
 }
 
