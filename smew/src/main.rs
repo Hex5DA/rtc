@@ -14,6 +14,7 @@ lazy_static! {
     static ref LAY_REG: Regex =
         Regex::new(r#"<!--\s*@layout\s+["|']([^"|']*)["|']\s*-->"#).unwrap();
     static ref SLOT_REG: Regex = Regex::new(r#"<!--\s*@slot\s*-->"#).unwrap();
+    static ref SAN_REG: Regex = Regex::new(r#"\$(?<san>\S+)"#).unwrap();
 }
 
 fn walk_dir(dir: &PathBuf) -> Result<Vec<PathBuf>> {
@@ -53,10 +54,14 @@ fn validate_path(
     Some(path)
 }
 
+fn sanitize(contents: String) -> String {
+    SAN_REG.replace_all(contents.as_str(), r#"$$$san"#).to_string()
+}
+
 fn resolve_components(file: &PathBuf) -> String {
     let contents = fs::read_to_string(&file).unwrap();
     COMP_REG
-        .replace_all(&contents, |capture: &Captures| {
+        .replace_all(&sanitize(contents), |capture: &Captures| {
             if let Some(path) =
                 validate_path(&PathBuf::from("components/"), capture, file, "component")
             {
@@ -102,7 +107,10 @@ fn resolve_layout(contents: String, file: &PathBuf) -> String {
             return contents;
         }
 
-        return SLOT_REG.replace(&layout_contents, &contents).to_string();
+        println!("{}\n---\n{}", layout_contents, contents);
+        let a = SLOT_REG.replace(&sanitize(layout_contents), &contents).to_string();
+        return a;
+
     } else {
         return contents;
     };
