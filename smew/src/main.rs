@@ -6,7 +6,7 @@ use std::{
 
 use anyhow::Result;
 use lazy_static::lazy_static;
-use regex::{Captures, Regex};
+use regex::{Captures, Regex, NoExpand};
 
 lazy_static! {
     static ref COMP_REG: Regex =
@@ -14,7 +14,6 @@ lazy_static! {
     static ref LAY_REG: Regex =
         Regex::new(r#"<!--\s*@layout\s+["|']([^"|']*)["|']\s*-->"#).unwrap();
     static ref SLOT_REG: Regex = Regex::new(r#"<!--\s*@slot\s*-->"#).unwrap();
-    static ref SAN_REG: Regex = Regex::new(r#"\$(?<san>\S+)"#).unwrap();
 }
 
 fn walk_dir(dir: &PathBuf) -> Result<Vec<PathBuf>> {
@@ -54,14 +53,10 @@ fn validate_path(
     Some(path)
 }
 
-fn sanitize(contents: String) -> String {
-    SAN_REG.replace_all(contents.as_str(), r#"$$$san"#).to_string()
-}
-
 fn resolve_components(file: &PathBuf) -> String {
     let contents = fs::read_to_string(&file).unwrap();
     COMP_REG
-        .replace_all(&sanitize(contents), |capture: &Captures| {
+        .replace_all(&contents, |capture: &Captures| {
             if let Some(path) =
                 validate_path(&PathBuf::from("components/"), capture, file, "component")
             {
@@ -107,9 +102,7 @@ fn resolve_layout(contents: String, file: &PathBuf) -> String {
             return contents;
         }
 
-        println!("{}\n---\n{}", layout_contents, contents);
-        let a = SLOT_REG.replace(&sanitize(layout_contents), &contents).to_string();
-        return a;
+        return SLOT_REG.replace(&layout_contents, NoExpand(&contents)).to_string();
 
     } else {
         return contents;
@@ -120,7 +113,6 @@ fn main() {
     let dist = PathBuf::from("dist/");
     let _ = fs::remove_dir_all(&dist);
     for file in walk_dir(&PathBuf::from("pages/")).unwrap() {
-        println!("start: {}", file.display());
         let contents = resolve_components(&file);
         let contents = resolve_layout(contents, &file);
 
