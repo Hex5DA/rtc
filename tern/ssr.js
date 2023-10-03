@@ -51,8 +51,7 @@ export async function ssrFile(path, imports, slugs, query) {
 
     dom.window.eval(`
         window.addEventListener("load", () => {
-            server.onload();
-            server.done = true;
+            (async () => await server.onload())().then(() => server.done = true);
         });
 
         document.head.insertAdjacentHTML(
