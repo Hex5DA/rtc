@@ -1,4 +1,5 @@
 :root {
+
     --lbg: #F8F0E3;
     --lfg: #272d35;
     --la: #d7dbd7;
@@ -7,31 +8,23 @@
     --dfg: #c5c8c6;
     --da: #181919;
 
+    --bg: var(--dbg);
+    --fg: var(--dfg);
+    --a: var(--da);
+    --na: var(--la);
     --flair: var(--fg);
+
+    --page-width: 90vw;
     --max-page-width: 80ch;
 }
 
 @media (prefers-color-scheme: light) {
-    html {
+    :root {
         --bg: var(--lbg);
         --fg: var(--lfg);
         --a: var(--la);
         --na: var(--da);
     }
-}
-
-html[data-theme="light"] {
-    --bg: var(--lbg);
-    --fg: var(--lfg);
-    --a: var(--la);
-    --na: var(--da);
-}
-
-html[data-theme="dark"], html:not([data-theme]) {
-    --bg: var(--dbg);
-    --fg: var(--dfg);
-    --a: var(--da);
-    --na: var(--la);
 }
 
 /* general layout shenanigans */
@@ -70,9 +63,8 @@ html[data-font="monospace"], html[data-font="monospace"] button {
     font-family: monospace;
 }
 
-
 main {
-    width: 90vw;
+    width: var(--page-width);
     max-width: var(--max-page-width);
 }
 
@@ -85,7 +77,6 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 a {
-    transition: text-decoration ease-in-out 1s;
     text-decoration: underline solid 2px;
     outline: none;
     color: var(--fg);
@@ -108,7 +99,7 @@ blockquote {
     background-color: var(--a);
     white-space: pre-line;
     border-radius: 10px;
-    width: 85%;
+    width: calc(var(--max-page-width) * 0.75);
     margin: 0 auto;
 }
 
@@ -156,7 +147,7 @@ figure, .center {
 }
 
 button, .highlight {
-    transition: box-shadow ease-in .4s, transform ease-in .4s;
+    transition: all ease-in .4s;
 }
 
 button:hover, .highlight:hover {
@@ -171,9 +162,7 @@ ol {
 /* figures & tables */
 
 table, figure {
-    --figcol: var(--na);
-    color: var(--figcol);
-    filter: brightness(0.95);
+    max-width: var(--max-page-width);
 }
 
 table {
@@ -184,36 +173,35 @@ td, th {
     padding: 5px 20px;
 }
 
+tr {
+    transition: background-color ease-in .1s;
+}
+
 td + td, th + th {
-    border-left: 2px solid var(--figcol);
+    border-left: 2px solid var(--fg);
 }
 
 thead, th {
-    border-bottom: 2px solid var(--figcol);
+    border-bottom: 2px solid var(--fg);
 }
 
-/* note: `figcaption` should be preferred when `table`
-          is otherwise the only child of `figure` */
 table caption, figcaption {
     font-style: italic;
     margin: 10px auto;
     padding-left: 10px;
-    border-left: 2px solid var(--figcol);
+    border-left: 1px solid var(--fg);
 }
 
-tr:hover {
-    transition: background-color ease-in .4s;
-}
 tbody tr:nth-child(even) {
     background-color: var(--a);
 }
 tbody tr:nth-child(even):hover { 
     background-color: var(--bg);
-    border: solid 2px var(--a); 
+    box-shadow: 0 0 0 2px var(--a) inset;
 }
 tbody tr:hover {
     background-color: var(--a);
-    border: solid 2px var(--bg); 
+    box-shadow: 0 0 0 2px var(--bg) inset;
 }
 
 /* buttons & forms */
@@ -234,7 +222,6 @@ header {
 
     padding: .4rem 1rem;
     transition: backdrop-filter ease-in-out 1s;
-    -webkit-backdrop-filter: blur(10px) grayscale(1) brightness(0.9);
     backdrop-filter: blur(10px) grayscale(1) brightness(0.9);
     border-bottom: 2px solid var(--a);
     z-index: 100;
