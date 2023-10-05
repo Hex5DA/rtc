@@ -1,4 +1,4 @@
-import { JSDOM } from "jsdom";
+import { JSDOM, ResourceLoader } from "jsdom";
 import fs from "fs";
 
 import * as lib from "./lib.js";
@@ -21,12 +21,25 @@ if (lib.runAsMain(import.meta.url, process.argv)) {
         console.log(dom);
 }
 
+function stripBeginning(str, substr) {
+    if (!str.startsWith(substr)) return null;
+    return str.slice(substr.length, str.length);
+}
+
+// a little hacky ;)
+class NormalisedResourceLoader extends ResourceLoader {
+    fetch(url, options) {
+        const location = stripBeginning(url, "file://");
+        const normalised = stripBeginning(location, "/") ?? location;
+        return super.fetch(`file://${resolve("dist/")}/${normalised}`, options);
+    }
+}
+
 export async function ssrFile(path, imports, slugs, query) {
     let domDone = false;
     const dom = await JSDOM.fromFile(path, {
         runScripts: "dangerously",
-        resources: "usable",
-        url: `file://${resolve("dist/")}`,
+        resources: new NormalisedResourceLoader(),
         beforeParse: window => {
             // server context.
             window.server = {
