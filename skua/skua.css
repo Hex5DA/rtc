@@ -27,6 +27,20 @@
     }
 }
 
+html[data-theme="light"] {
+    --bg: var(--lbg);
+    --fg: var(--lfg);
+    --a: var(--la);
+    --na: var(--da);
+}
+
+html[data-theme="dark"], html:not([data-theme]) {
+    --bg: var(--dbg);
+    --fg: var(--dfg);
+    --a: var(--da);
+    --na: var(--la);
+}
+
 /* general layout shenanigans */
 
 body {
@@ -174,7 +188,7 @@ td, th {
 }
 
 tr {
-    transition: background-color ease-in .1s;
+    transition: background-color ease-out .05s;
 }
 
 td + td, th + th {
