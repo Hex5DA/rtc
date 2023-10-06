@@ -81,7 +81,15 @@ export async function ssrFile(path, imports, slugs, query) {
 
         document.head.insertAdjacentHTML(
             'afterbegin',
-            '<script>const server = { serverSide: false };</script>'
+            \`
+            <script>
+            const server = {
+                serverSide: false,
+                addEventListener: () => {},
+                dispatchEvent: () => {},
+            };
+            </script>
+            \`
         );
     `);
 
