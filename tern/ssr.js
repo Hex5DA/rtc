@@ -35,6 +35,7 @@ class NormalisedResourceLoader extends ResourceLoader {
     }
 }
 
+
 export async function ssrFile(path, imports, slugs, query) {
     let domDone = false;
     const dom = await JSDOM.fromFile(path, {
@@ -50,7 +51,18 @@ export async function ssrFile(path, imports, slugs, query) {
                 node: globalThis,
                 /** @param {bool} value */
                 set done(value) { domDone = value; },
-                onload: () => { },
+                
+                _events: {},
+                addEventListener: function (eventName, handler) {
+                    if (eventName in this._events)
+                        this._events[eventName].push(handler);
+                    else
+                        this._events[eventName] = [handler];
+                },
+                dispatchEvent: async function (eventName) {
+                    if (!(eventName in this._events)) return null;
+                    return Promise.all(this._events[eventName].map(handler => (async () => await handler())()));
+                },
             };
 
             // hack to prevent `window.onload` being overwritten server-side
@@ -64,7 +76,7 @@ export async function ssrFile(path, imports, slugs, query) {
 
     dom.window.eval(`
         window.addEventListener("load", () => {
-            (async () => await server.onload())().then(() => server.done = true);
+            server.dispatchEvent("load").then(() => server.done = true);
         });
 
         document.head.insertAdjacentHTML(
