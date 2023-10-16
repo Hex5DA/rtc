@@ -108,7 +108,7 @@ q {
     font-style: italic;
 }
 
-blockquote {
+blockquote, pre, :not(pre) > code {
     padding: 10px;
     background-color: var(--a);
     white-space: pre-line;

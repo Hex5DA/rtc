@@ -30,8 +30,12 @@ function stripBeginning(str, substr) {
 class NormalisedResourceLoader extends ResourceLoader {
     fetch(url, options) {
         const location = stripBeginning(url, "file://");
-        const normalised = stripBeginning(location, "/") ?? location;
-        return super.fetch(`file://${resolve("dist/")}/${normalised}`, options);
+        if (location !== null) {
+            const normalised = stripBeginning(location, "/") ?? location;
+            return super.fetch(`file://${resolve("dist/")}/${normalised}`, options);
+        } else {
+            return super.fetch(url, options);
+        }
     }
 }
 
