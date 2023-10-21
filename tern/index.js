@@ -63,7 +63,7 @@ function errPage(code, reason) {
 
 const app = express();
 app.use("/public", express.static(path.resolve("dist/public/")));
-const re = /\[([\w ]+)\]/g;
+const re = /\[(\w+)\]/g;
 
 // we sort the files such that dynamic routes always come last.
 // this is because `expressjs` routes are first-come first-serve.
@@ -86,6 +86,7 @@ for (const file of files) {
         if (base === null) continue;
         const rawUrl = strStripEnd(base, "index") ?? base;
         const url = rawUrl.replaceAll(re, (_, cap) => `:${cap}`);
+        console.log(url);
 
         app.get(`/${url}`, async (req, res, _next) => {
             const contents = await ssrFile(filePath, imports, req.params, req.query);

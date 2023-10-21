@@ -1,5 +1,4 @@
 :root {
-
     --lbg: #F8F0E3;
     --lfg: #272d35;
     --la: #d7dbd7;
@@ -34,7 +33,7 @@ html[data-theme="light"] {
     --na: var(--da);
 }
 
-html[data-theme="dark"], html:not([data-theme]) {
+html[data-theme="dark"] {
     --bg: var(--dbg);
     --fg: var(--dfg);
     --a: var(--da);
@@ -154,14 +153,14 @@ aside > :is(h1, h2, h3, h4, h5, h6) {
 
 /* utility classes */
 
-figure, .center {
+figure, form, .center {
     width: fit-content;
     margin-right: auto;
     margin-left: auto;
 }
 
 button, .highlight {
-    transition: all ease-in .4s;
+    transition: transform, box-shadow ease-in .4s;
 }
 
 button:hover, .highlight:hover {
@@ -221,12 +220,17 @@ tbody tr:hover {
 
 /* buttons & forms */
 
-button {
+button, input {
     background-color: var(--a);
     color: var(--fg);
     padding: 10px;
     border: 2px var(--fg) solid;
     border-radius: 10px;
+}
+
+input:focus {
+    border-style: dashed;
+    outline: none;
 }
 
 /* header, footer & nav */
