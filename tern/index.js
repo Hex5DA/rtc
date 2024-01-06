@@ -63,7 +63,7 @@ function errPage(code, reason) {
 
 const app = express();
 app.use("/public", express.static(path.resolve("dist/public/")));
-const re = /\[(\w+)\]/g;
+const re = /\b__(?<catchall>[a-zA-Z0-9]+)(?=.html|\/index\.html)|\b_([a-zA-Z0-9]+)/gm;
 
 // we sort the files such that dynamic routes always come last.
 // this is because `expressjs` routes are first-come first-serve.
@@ -82,13 +82,22 @@ function strStripEnd(str, pattern) {
 for (const file of files) {
     const filePath = path.resolve(`${sourceDir}/${file}`);
     if (fs.lstatSync(filePath).isFile()) {
-        const base = strStripEnd(file, ".html");
-        if (base === null) continue;
-        const rawUrl = strStripEnd(base, "index") ?? base;
-        const url = rawUrl.replaceAll(re, (_, cap) => `:${cap}`);
-        console.log(url);
+        let catchallName;
+        const slugged = file.replaceAll(re, (_match, catchall, slug) => {
+            catchallName = catchall;
+            return catchall ? "*" : `:${slug}`;
+        });
+
+        const base = strStripEnd(slugged, ".html");
+        if (base === null) continue; // skip non-html files
+        const url = strStripEnd(base, "index") ?? base; // index.html should path as directory
+        console.log(`/${url}`);
 
         app.get(`/${url}`, async (req, res, _next) => {
+            if (req.params["0"]) {
+                req.params[catchallName] = req.params["0"]; // we only allow 1 catchall so this is.. fine
+                delete req.params["0"];
+            }
             const contents = await ssrFile(filePath, imports, req.params, req.query);
             res.contentType("text/html").send(contents);
         });
