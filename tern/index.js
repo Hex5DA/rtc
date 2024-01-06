@@ -91,8 +91,8 @@ for (const file of files) {
         const base = strStripEnd(slugged, ".html");
         if (base === null) continue; // skip non-html files
         const url = strStripEnd(base, "index") ?? base; // index.html should path as directory
-        console.log(`/${url}`);
 
+        console.log(url);
         app.get(`/${url}`, async (req, res, _next) => {
             if (req.params["0"]) {
                 req.params[catchallName] = req.params["0"]; // we only allow 1 catchall so this is.. fine
