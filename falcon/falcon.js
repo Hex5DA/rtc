@@ -2,6 +2,8 @@ const jsNameRgx = /\[\s*([a-zA-Z_$]?|[\w$]*)\s*\]/g;
 
 window.$all = selector => document.querySelectorAll(selector);
 window.$ = selector => document.querySelector(selector);
+Element.$all = function (selector) { return this.querySelectorAll(selector); }
+Element.$ = function (selector) { return this.querySelector(selector); }
 
 const HTMLPositions = {
     beforeBegin: "beforebegin",
@@ -238,7 +240,11 @@ function _event(target, eventName) {
         },
         /** @param {function(Event): void} handler */
         set on(handler) {
-            target.addEventListener(eventName, handler)
+            // if `currentScript` is `undefined`, we are executed from _within_ an event listener.
+            // we will assume this means the listener is valid, and bypass checks.
+            // NOTE: if someone is using `addEventListener`, we're fucked :sweat_smile:
+            const defining = document.currentScript || {};
+            target.addEventListener(eventName, ev => (defining.isConnected ?? true) && handler(ev));
         }
     };
 }
@@ -254,24 +260,17 @@ const _registerEvents = cls => cls.prototype.$event = function(eventName) { retu
 _registerEvents(EventTarget);
 // _registerEvents($State);
 
-HTMLElement.prototype.$select = function(option) {
-    for (child of this.children) {
-        if (child.value != option)
-            child.remove();
-    }
+NodeList.prototype.$cfg = function(option) {
+    this.forEach(node => {
+        if (((node instanceof HTMLOptionElement && node.value) || node.dataset.value) != option)
+            node.remove();
+    });
+}
 
-    if (!this.children.length)
-        throw "`option` was listed";
-};
-
-HTMLElement.prototype.$reselect = function(option) {
-    let found = false;
-    for (child of this.children) {
-        child.style.display = child.value === option ? "block" : "none";
-        found = true;
-    }
-
-    if (!found)
-        throw "`option` was listed";
-};
+NodeList.prototype.$recfg = function(option) {
+    this.forEach(node => {
+        node.style.display = (((node instanceof HTMLOptionElement && node.value)
+                                || node.dataset.value) != option) ? "revert" : "none";
+    });
+}
 
