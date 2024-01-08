@@ -43,9 +43,12 @@ html[data-theme="dark"] {
 /* general layout shenanigans */
 
 body {
+    position: relative;
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
+    
     margin: 0;
 }
 
@@ -248,8 +251,10 @@ header {
 }
 
 footer {
-    position: relative;
-    bottom: 0;
+    position: sticky;
+    margin-top: auto;
+
+    display: flex;
     padding: .6rem;
     background-color: var(--a);
 }
