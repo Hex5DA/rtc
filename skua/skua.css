@@ -69,13 +69,13 @@ main {
 a {
     text-decoration: underline solid 1px;
     outline: none;
-    color: var(--fg);
+    color: var(--skua-foreground);
 }
 a:hover {
     text-decoration: underline dashed 1px;
 }
 a:visited {
-    color: var(--na);
+    color: var(--skua-accent-inverted);
 }
 
 header *, footer * {
@@ -89,7 +89,6 @@ header, footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    min-height: 2rem;
 
     background-color: var(--skua-accent);
     padding: .4rem 1rem;
@@ -100,12 +99,17 @@ footer {
 }
 
 table {
+    max-width: var(--skua-max-page-width);
     border-collapse: collapse;
+    table-layout: fixed;
+    width: 100%;
 }
 td, th {
-    padding: 5px 20px 5px 10px;
+    padding: 2px 20px 1px 10px;
 }
 td {
+    word-wrap: break-word;
+    white-space: pre-wrap;
     text-align: left;
 }
 tr {
