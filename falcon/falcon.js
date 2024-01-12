@@ -1,21 +1,13 @@
-const jsNameRgx = /\[\s*([a-zA-Z_$]?|[\w$]*)\s*\]/g;
-
 window.$all = selector => document.querySelectorAll(selector);
 window.$ = selector => document.querySelector(selector);
 Element.$all = function(selector) { return this.querySelectorAll(selector); }
 Element.$ = function(selector) { return this.querySelector(selector); }
 
-const HTMLPositions = {
-    beforeBegin: "beforebegin",
-    afterBegin: "afterbegin",
-    beforeEnd: "beforeend",
-    afterEnd: "afterend",
-};
-
 Element.prototype.$html = function(pos, lit) {
     this.insertAdjacentHTML(pos, lit);
 }
 
+const jsNameRgx = /\[\s*([a-zA-Z_$]?|[\w$]*)\s*\]/g;
 function _template(source, ctx) {
     return source.replace(jsNameRgx, (_, cap) => {
         if (!(cap in ctx)) {
@@ -35,7 +27,7 @@ Element.prototype.$template = function(ctx) {
 
 Element.prototype.$retemplate = function(ctx) {
     if (this.$_templateReal) this.$_templateReal.remove();
-    this.$html(HTMLPositions.afterEnd, _template(this.outerHTML, ctx));
+    this.$html("afterend", _template(this.outerHTML, ctx));
     this.$_templateReal = this.nextElementSibling;
 
     _removeIdentifiable(this.$_templateReal);
@@ -44,7 +36,7 @@ Element.prototype.$retemplate = function(ctx) {
 };
 
 Element.prototype.$templateClone = function(ctx, attrs = {}) {
-    this.$html(HTMLPositions.afterEnd, _template(this.outerHTML, ctx));
+    this.$html("afterend", _template(this.outerHTML, ctx));
     _removeIdentifiable(this.nextElementSibling);
     this.nextElementSibling.style.display = "revert";
     this.style.display = "none";
@@ -68,7 +60,7 @@ NodeList.prototype.$recfg = function(option) {
     });
 };
 
-// idk abt this
+// TODO: this is borked and should probably die
 NodeList.prototype.$cfgClone = function(option) {
     this.forEach(node => {
         node.setAttribute("data-flntemplate", "");
@@ -90,8 +82,9 @@ NodeList.prototype.$cfgClone = function(option) {
 };
 
 
-function _event(target, eventName) {
-    if (!target["addEventListener"]) throw Error("`$event` should only be called on objects with event support.");
+function $objEvent(target, eventName) {
+    if (!target["addEventListener"]) throw Error("event functions should only be called on objects with event support.");
+    if (!target["dispatchEvent"]) throw Error("event functions should only be called on objects with event support.");
 
     return {
         dispatch: function(event) {
@@ -108,10 +101,7 @@ function _event(target, eventName) {
     };
 }
 
-function $objEvent(obj, eventName) {
-    return _event(obj, eventName);
-}
-
-const _registerEvents = cls => cls.prototype.$event = function(eventName) { return _event(this, eventName); };
-_registerEvents(EventTarget);
+EventTarget.prototype.$event = function (eventName) {
+    return $objEvent(this, eventName);
+};
 
