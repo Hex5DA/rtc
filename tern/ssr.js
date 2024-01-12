@@ -43,6 +43,7 @@ class NormalisedResourceLoader extends ResourceLoader {
 export async function ssrFile(path, imports, slugs, query) {
     let domDone = false;
     const dom = await JSDOM.fromFile(path, {
+        url: "http://localhost:8080/", // TODO: configurable
         runScripts: "dangerously",
         resources: new NormalisedResourceLoader(),
         beforeParse: window => {

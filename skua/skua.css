@@ -1,6 +1,6 @@
 :root {
-    --skua-background-light: #fffdd0;
-    --skua-foreground-light: #22244f;
+    --skua-background-light: #f1f0d6; /* #fffdd0; */
+    --skua-foreground-light: #2b3351; /* #22244f; */
     --skua-accent-light: #d7dbd7;
 
     --skua-background-dark: #131313;
@@ -105,15 +105,15 @@ table {
     width: 100%;
 }
 td, th {
-    padding: 2px 20px 1px 10px;
+    padding: 2px 20px 2px 10px;
 }
 td {
     word-wrap: break-word;
     white-space: pre-wrap;
     text-align: left;
 }
-tr {
-    transition: background-color ease-out .05s;
+tr:hover {
+    transition: background-color ease-out .10s;
 }
 tbody tr:nth-child(even) {
     background-color: var(--skua-accent);
