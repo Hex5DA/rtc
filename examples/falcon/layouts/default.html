@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FALCON DEMONSTRATION</title>
+    <style>
+    body {
+        background-color: #EEEEEE;
+        line-height: 1.6;
+        height: 100vh;
+
+        margin: 0 auto;
+        width: 40vw;
+        font-family: sans-serif;
+    }
+
+    .example-result {
+        border: 1px black solid;
+        white-space: pre-wrap;
+    }
+    </style>
+
+    <script src="../../../falcon/falcon.js"></script>
+    <script>
+    window.$event("load").on = () => {
+        const ref = $("#basic-example");
+        const examples = $all(".example");
+        examples.forEach(ex => {
+            const san = ref.innerHTML.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+            ref.$html("beforebegin", `<pre class="example-result"><code>${san}</code></pre>`);
+        });
+    };
+    </script>
+
+</head>
+</body>
+    <!-- @slot -->
+</body>
+</html>

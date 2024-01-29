@@ -11,7 +11,19 @@
     --skua-page-width: 90vw;
     --skua-max-page-width: 80ch;
 
+    background-color: var(--skua-background);
+    color: var(--skua-foreground);
+
     font-family: sans-serif;
+    line-height: 1.6;
+    font-size: 18px;
+}
+
+/* why do i need to do this? fuck if i know */
+
+button, input, label {
+    background-color: unset;
+    color: unset;
 }
 
 html[data-theme="dark"], :root {
@@ -38,21 +50,17 @@ html[data-theme="light"] {
     --skua-accent-inverted: var(--skua-accent-dark);
 }
 
+html {
+    height: 100%;
+}
+
 body {
-    height: 100vh;
+    min-height: 100%;
     margin: 0;
 
     display: flex;
     flex-direction: column;
 }
-
-/* HACK: tables were being a PITA. bandaid fix */
-*:not(table *) {
-    background-color: var(--skua-background);
-    color: var(--skua-foreground);
-    line-height: 1.6;
-    font-size: 19px;
-}   
 
 h1, h2 {
     line-height: 1.8;

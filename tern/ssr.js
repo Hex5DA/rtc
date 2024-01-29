@@ -40,7 +40,7 @@ class NormalisedResourceLoader extends ResourceLoader {
 }
 
 
-export async function ssrFile(path, imports, slugs, query) {
+export async function ssrFile(path, imports, slugs, query, url) {
     let domDone = false;
     const dom = await JSDOM.fromFile(path, {
         url: "http://localhost:8080/", // TODO: configurable
@@ -52,6 +52,7 @@ export async function ssrFile(path, imports, slugs, query) {
                 imports: imports ?? {},
                 slugs: slugs ?? {},
                 query: query ?? {},
+                url: url ?? "",
                 serverSide: true,
                 node: globalThis,
                 /** @param {bool} value */

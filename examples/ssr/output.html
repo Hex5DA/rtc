@@ -1,0 +1,78 @@
+<!doctype html>
+<html>
+  <head></head>
+  <body>
+    <script>
+      const server = {};
+    </script>
+    <script>
+      window.onload = () => {
+        const refresh = document.getElementById("refresh");
+        refresh.onclick = () => updateTable(getDataFromApiCall());
+      };
+
+      server.onload = () => {
+        const data = JSON.parse(server.fs.readFileSync("data.json"));
+        updateTable(data["todos"]);
+      };
+
+      function updateTable(data) {
+        const body = document.getElementById("table-body");
+        body.innerHTML = "";
+        for (const row of data) {
+          body.insertAdjacentHTML(
+            "beforeend",
+            `
+                <tr>
+                    <td>${row.name}</td>
+                    <td>${row.done ? "yes" : "no"}</td>
+                </tr>
+            `,
+          );
+        }
+      }
+
+      function getDataFromApiCall() {
+        // you could have API logic here, for example :)
+        return [{ name: "more shitttt", done: false }];
+      }
+    </script>
+
+    <h1>testing SSR in RTC</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>TODO task</th>
+          <th>done?</th>
+        </tr>
+      </thead>
+      <tbody id="table-body">
+        <tr>
+          <td>work on rtc</td>
+          <td>no</td>
+        </tr>
+
+        <tr>
+          <td>get up</td>
+          <td>yes</td>
+        </tr>
+
+        <tr>
+          <td>have breakfast</td>
+          <td>yes</td>
+        </tr>
+
+        <tr>
+          <td>have a nap</td>
+          <td>no</td>
+        </tr>
+
+        <tr>
+          <td>walk the dog</td>
+          <td>yes</td>
+        </tr>
+      </tbody>
+    </table>
+    <button id="refresh">refresh data</button>
+  </body>
+</html>

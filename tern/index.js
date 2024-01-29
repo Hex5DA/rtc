@@ -97,7 +97,7 @@ for (const file of files) {
                 req.params[catchallName] = req.params["0"]; // we only allow 1 catchall so this is.. fine
                 delete req.params["0"];
             }
-            const contents = await ssrFile(filePath, imports, req.params, req.query);
+            const contents = await ssrFile(filePath, imports, req.params, req.query, req.url);
             res.contentType("text/html").send(contents);
         });
     }

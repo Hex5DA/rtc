@@ -46,6 +46,7 @@ Element.prototype.$templateClone = function(ctx, attrs = {}) {
     }
 }
 
+// would this make more sense as $select?
 NodeList.prototype.$cfg = function(option) {
     this.forEach(node => {
         if (((node instanceof HTMLOptionElement && node.value) || node.dataset.value) != option)
@@ -60,20 +61,22 @@ NodeList.prototype.$recfg = function(option) {
     });
 };
 
-// TODO: this is borked and should probably die
 NodeList.prototype.$cfgClone = function(option) {
-    this.forEach(node => {
+    const firstIter = Array.from(this).every(el => !el.hasAttribute("data-flntemplate"));
+    if (firstIter) this.forEach(node => {
         node.setAttribute("data-flntemplate", "");
-        if (node.hasAttribute("data-cloned")) return;
         node.style.display = "none";
+    });
 
+    this.forEach(node => {
+        if (!node.hasAttribute("data-flntemplate")) return;
         if (((node instanceof HTMLOptionElement && node.value)
             || node.dataset.value) == option) {
 
             node.after(node.cloneNode(true));
             _removeIdentifiable(node.nextSibling);
+            node.nextSibling.removeAttribute("data-flntemplate");
             node.nextSibling.style.display = "revert";
-            node.nextSibling.setAttribute("data-cloned", "");
 
             if (node.nextSibling.dataset.value) node.nextSibling.removeAttribute("data-value");
             if (node.nextSibling.value) node.nextSibling.removeAttribute("value");
@@ -82,13 +85,14 @@ NodeList.prototype.$cfgClone = function(option) {
 };
 
 
-function $objEvent(target, eventName) {
+function $objEvent(target, ...eventNames) {
     if (!target["addEventListener"]) throw Error("event functions should only be called on objects with event support.");
     if (!target["dispatchEvent"]) throw Error("event functions should only be called on objects with event support.");
 
     return {
-        dispatch: function(event) {
-            return target.dispatchEvent(event);
+        dispatch: function() {
+            const prospects = eventNames.map(eventName => target.dispatchEvent(eventName));
+            return prospects === 1 ? prospects[0] : prospects;
         },
         /** @param {function(Event): void} handler */
         set on(handler) {
@@ -96,12 +100,14 @@ function $objEvent(target, eventName) {
             // we will assume this means the listener is valid, and bypass checks.
             // NOTE: if someone is using `addEventListener`, we're fucked :sweat_smile:
             const defining = document.currentScript || {};
-            target.addEventListener(eventName, ev => (defining.isConnected ?? true) && handler(ev));
+            // console.log(defining);
+            eventNames.forEach(eventName =>
+                target.addEventListener(eventName, ev => (defining.isConnected ?? true) && handler(ev)));
         }
     };
 }
 
-EventTarget.prototype.$event = function (eventName) {
-    return $objEvent(this, eventName);
+EventTarget.prototype.$event = function (...eventNames) {
+    return $objEvent(this, ...eventNames);
 };
 
