@@ -1,0 +1,53 @@
+  == STF GRAMMAR ==
+
+headings are surrounded by 1 or more [ch]. parsers *may* error if
+  the number of [ch]s are uneven.
+[ch] may be ``=`` to denote a high-level heading, or ``-`` to denote a low-level heading
+
+- lines -
+
+lines can be arbritrary length.
+the baseline is the amount of whitespace before a non-whitespace character.
+following a newline, if there is any whitespace *after the baseline* before 
+  the first non-whitespace character, it is ignored, and all succeeding text
+  should be rendered on the same visible line as the former line, with a singular space gap (' ')
+when text is written without meeting the baseline it is a new line.
+the baseline depends on context. in normal text, it is 1.
+in quotes, it is the index of the opening ``>>``.
+in code blocks, it is the index of the opening ``\`\```.
+
+any other newlines or whitespace should be respected.
+
+- lists -
+
+a list is defined with a singular non-alphabetic character (eg. ``-``, ``*``, ``?``),
+  folowed by an arbritrary amount of whitespace, and a line.
+the baseline is set as the index of the "point character".
+a line is defined as previously discussed.
+
+- formatting -
+
+text surrounded by ``*``s should be rendered in *bold*.
+text surrounded by ``_``s should be rendered in _italics_.
+
+links are denoted by ``<>``s.
+if links are preceded by text in ``[]``s should be rendered as a link preview text.
+links follow normal addressing rules, or, if they begin with a ``#`` can refer to a heading.
+-> (NOTE: if a high & low order heading collide names, the high order heading should take precedence)
+the use of embeds is implementation defined but is discouraged.
+
+- elements -
+
+quotes are written in between ``>>``/``<<``s, following the baseline rules outlined [above]<#lines>.
+code is written between ``\`\`\`\```s, following the baseline rules outline [above]<#lines>.
+a language identifier can be written between the opening ``\```s. it may be ignored.
+code should be rendered in a monospace font, and should _not_ be formatted further.
+-> one excpetion is the identifier ``stf``. a parser _may_ format this following the above rules
+     but must still remain in a monspace font.
+
+- escaping -
+
+to escape any above "special character", prefix it with ``\\``.
+characters are escaped - not constructs - so ``\== hello ==`` should be rendered as
+  ``= HEADING (hello) =``
+

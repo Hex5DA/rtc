@@ -1,0 +1,38 @@
+=== MY SIMPLE TEXT FORMAT ==
+-- low order heading --
+
+one continous
+  line
+newline
+
+gap
+
+- item
+* item
+! item
+
+>> inline quotes <<
+   ~ me
+
+>> multiline,
+     quotes    <<
+   ~ also me
+
+``code block``
+
+`python`
+multine code block
+:)
+``
+
+*bold*
+_italic_
+
+<https://link.com>
+[text]<https://link.com>
+[text]<#heading>
+
+\* escaped \*
+\=\= escaped \=\=
+\[text]\<https://escaped.com>
+

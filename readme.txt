@@ -1,13 +1,22 @@
 # RTC
 
+# le vision grande
+
+can build a docker container for sane deployments.
+can select different workflows by chaining components and building.
+SSR: like normal
+SSG: run `tern-ssr` as binary seperately from `tern-router` to pre-generate, and run on github commit push w/ github actions
+  (make a template or just `sh ./build.sh`?) or self-hosted git server commit hook
+
+upload all the components as seperate `npm` packages, like `rtc-tern` or whatever
+have a `create-rtc-app` package which is a simple TUI (like text not a _TUI_ TUI), selects different
+  components and creates a new `npm` binary project following a variable template which has the `rtc` components as deps
+? can CSS be published to `npm`? (READ: `skua`) or `create-rtc-app` can just `wget` in shell.
+CRA also has facilities for workflows, and docker, and can template for those too
+
 ## todo
 
 * config
-- CSL/CSS
-? release some of these packages?
-? investigate more helpful SSR errors?
-  - note: `DOMException`
-  ? wrap DOM with custom errors
 
 Reset The Counter - a composite framework with an emphasis of simplicity which emulates the vanilla web.
 
