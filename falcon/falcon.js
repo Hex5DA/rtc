@@ -10,9 +10,8 @@ Element.prototype.$html = function(pos, lit) {
 const jsNameRgx = /\[\s*([a-zA-Z_$]?|[\w$]*)\s*\]/g;
 function _template(source, ctx) {
     return source.replace(jsNameRgx, (_, cap) => {
-        if (!(cap in ctx)) {
+        if (!(cap in ctx))
             throw Error(`template literal ${cap} was not provided in the given context`);
-        }
         return ctx[cap];
     });
 }
@@ -100,7 +99,6 @@ function $objEvent(target, ...eventNames) {
             // we will assume this means the listener is valid, and bypass checks.
             // NOTE: if someone is using `addEventListener`, we're fucked :sweat_smile:
             const defining = document.currentScript || {};
-            // console.log(defining);
             eventNames.forEach(eventName =>
                 target.addEventListener(eventName, ev => (defining.isConnected ?? true) && handler(ev)));
         }

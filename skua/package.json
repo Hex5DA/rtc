@@ -1,0 +1,19 @@
+{
+  "name": "rtc-skua",
+  "version": "0.1.0",
+  "description": "highly minimal CSS library, 1/2 developed",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hex5DA/rtc.git"
+  },
+  "author": "0x5DA",
+  "license": "Unlicense",
+  "bugs": {
+    "url": "https://github.com/Hex5DA/rtc/issues"
+  },
+  "homepage": "https://github.com/Hex5DA/rtc#readme"
+}
