@@ -1,15 +1,15 @@
 {
-  "name": "fsr2",
-  "version": "1.0.0",
-  "description": "",
+  "name": "rtc-tern",
+  "version": "0.1.2",
+  "description": "simple expressjs-based http server & SSR tool",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "type": "module",
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "0x5DA",
+  "license": "Unlicense",
+  "bin": {
+    "rtc-tern": "index.js",
+    "rtc-tern-ssr": "ssr.js"
+  },
   "dependencies": {
     "express": "^4.18.2",
     "jsdom": "^22.1.0"

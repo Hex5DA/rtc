@@ -1,4 +1,4 @@
-#! node
+#!/usr/bin/env node
 
 import express from "express";
 import fs from "fs";
@@ -97,7 +97,7 @@ for (const file of files) {
                 req.params[catchallName] = req.params["0"]; // we only allow 1 catchall so this is.. fine
                 delete req.params["0"];
             }
-            const contents = await ssrFile(filePath, imports, req.params, req.query, req.url);
+            const contents = await ssrFile(filePath, imports, req.params, req.query, req.url, sourceDir);
             res.contentType("text/html").send(contents);
         });
     }

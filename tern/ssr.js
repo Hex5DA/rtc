@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { JSDOM, ResourceLoader } from "jsdom";
 import fs from "fs";
 
@@ -28,11 +30,15 @@ function stripBeginning(str, substr) {
 
 // a little hacky ;)
 class NormalisedResourceLoader extends ResourceLoader {
+    constructor(srcDir) {
+        this.srcDir = srcDir;
+    }
+
     fetch(url, options) {
         const location = stripBeginning(url, "file://");
         if (location !== null) {
             const normalised = stripBeginning(location, "/") ?? location;
-            return super.fetch(`file://${resolve("dist/")}/${normalised}`, options);
+            return super.fetch(`file://${resolve(this.srcDir)}/${normalised}`, options);
         } else {
             return super.fetch(url, options);
         }
@@ -40,12 +46,12 @@ class NormalisedResourceLoader extends ResourceLoader {
 }
 
 
-export async function ssrFile(path, imports, slugs, query, url) {
+export async function ssrFile(path, imports, slugs, query, url, srcDir) {
     let domDone = false;
     const dom = await JSDOM.fromFile(path, {
         url: "http://localhost:8080/", // TODO: configurable
         runScripts: "dangerously",
-        resources: new NormalisedResourceLoader(),
+        resources: new NormalisedResourceLoader(srcDir),
         beforeParse: window => {
             // server context.
             window.server = {

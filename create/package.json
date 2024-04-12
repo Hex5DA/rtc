@@ -1,0 +1,18 @@
+{
+  "name": "create-rtc-app",
+  "version": "0.1.2",
+  "description": "utility to create & configure an RTC project",
+  "main": "index.js",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/0x5da/rtc.git"
+  },
+  "bin": "index.js",
+  "author": "0x5DA",
+  "license": "Unlicense",
+  "bugs": {
+    "url": "https://github.com/0x5da/rtc/issues"
+  },
+  "homepage": "https://github.com/0x5da/rtc#readme"
+}

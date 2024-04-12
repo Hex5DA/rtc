@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import * as path from "path";
 import * as fs from "fs";
 
@@ -31,7 +33,7 @@ function onlyOneMatch(str, regex, file, directive) {
     const occ = (str.match(regex) || []).length;
 
     if (occ === 0) {
-        console.error(`file '${file}' does not contain a {directive} directive`);
+        console.error(`file '${file}' does not contain a ${directive} directive`);
         return null;
     } else if (occ > 1) {
         console.error(`files may only contain 1 ${directive} directive`);

@@ -1,8 +1,8 @@
 {
-  "name": "rtc-falcon",
-  "version": "0.1.0",
-  "description": "a simple JS library to make life a _little_ less painful",
-  "main": "falcon.js",
+  "name": "rtc-smew",
+  "version": "0.1.1",
+  "description": "a simple template tool",
+  "main": "index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Hex5DA/rtc.git"
@@ -10,6 +10,7 @@
   "type": "module",
   "author": "0x5DA",
   "license": "Unlicense",
+  "bin": "./index.js",
   "bugs": {
     "url": "https://github.com/Hex5DA/rtc/issues"
   },
