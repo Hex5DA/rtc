@@ -85,18 +85,11 @@ const COMPONENTS = [
         },
     },
     {
-        name: "tern",
-        setup: () => {
-            sh("npm add rtc-tern");
-            fs.mkdirSync("public/");
-        },
-    },
-    {
         name: "falcon",
         setup: using => {
             sh("npm add rtc-falcon")
             using.falcon.path = "tern" in using ? "./public/falcon.js" : "./falcon.js";
-            fs.symlinkSync("./node_modules/rtc-falcon/falcon.js", using.falcon.path);
+            fs.symlinkSync("./node_modules/rtc-falcon/falcon.js", using.falcon.path, "junction");
         },
     },
     {
@@ -104,7 +97,7 @@ const COMPONENTS = [
         setup: using => {
             sh("npm add rtc-skua")
             using.skua.path = "tern" in using ? "./public/skua.css" : "./skua.css";
-            fs.symlinkSync("./node_modules/rtc-skua/skua.css", using.skua.path);
+            fs.symlinkSync("./node_modules/rtc-skua/skua.css", using.skua.path, "junction");
         },
     },
     {
@@ -132,6 +125,13 @@ const COMPONENTS = [
 
             if ("git" in using)
                 fs.appendFileSync(".gitignore", "dist\n");
+        },
+    },
+    {
+        name: "tern",
+        setup: () => {
+            sh("npm add rtc-tern");
+            fs.mkdirSync("public/");
         },
     },
 ];
@@ -175,3 +175,13 @@ for (const component of COMPONENTS) {
 
 // HACK: wtf?
 process.exit(0);
+
+
+/*
+- symlinks broken
+- copying public broken
+- ordering broken
+- tern broken
+- UX broken
+- ctrl-C broken 
+*/

@@ -7,6 +7,9 @@
     "type": "git",
     "url": "git+https://github.com/Hex5DA/rtc.git"
   },
+  "scripts": {
+    "postintall": "script.js"
+  },
   "author": "0x5DA",
   "license": "Unlicense",
   "bugs": {

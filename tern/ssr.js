@@ -31,6 +31,7 @@ function stripBeginning(str, substr) {
 // a little hacky ;)
 class NormalisedResourceLoader extends ResourceLoader {
     constructor(srcDir) {
+        super();
         this.srcDir = srcDir;
     }
 

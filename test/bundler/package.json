@@ -1,18 +1,15 @@
 {
-  "name": "testapp",
+  "name": "bundler",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "rtc-falcon": "^0.1.0",
-    "rtc-skua": "^0.1.0",
-    "rtc-smew": "^0.1.1",
+    "is-odd": "^3.0.1",
     "rtc-tern": "^0.1.2"
   }
 }

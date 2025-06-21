@@ -63,6 +63,7 @@ function errPage(code, reason) {
 
 const app = express();
 app.use("/public", express.static(path.resolve("dist/public/")));
+app.use("/deps", express.static(path.resolve("dist/deps/")));
 const re = /\b__(?<catchall>[a-zA-Z0-9]+)(?=.html|\/index\.html)|\b_([a-zA-Z0-9]+)/gm;
 
 // we sort the files such that dynamic routes always come last.

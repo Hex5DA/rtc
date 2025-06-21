@@ -1,6 +1,6 @@
 {
   "name": "create-rtc-app",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "utility to create & configure an RTC project",
   "main": "index.js",
   "type": "module",
